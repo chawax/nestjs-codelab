@@ -23,11 +23,13 @@ export class PlanetService {
     return this.planetsRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} planet`;
+  findOne(id) {
+    return this.planetsRepository.findById({id});
   }
 
   update(id: number, updatePlanetDto: UpdatePlanetDto) {
+    const planet = plainToInstance(Planet, updatePlanetDto);
+    this.planetsRepository.save(planet);
     return `This action updates a #${id} planet`;
   }
 

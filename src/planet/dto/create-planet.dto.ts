@@ -1,5 +1,4 @@
-export class CreatePlanetDto {    
-  id: string;
+export class CreatePlanetDto {
   name: string;
   distanceToEarth: object;
 }

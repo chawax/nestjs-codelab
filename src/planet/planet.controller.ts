@@ -11,6 +11,16 @@ export class PlanetController {
   @Post()
   create(@Body() createPlanetDto: CreatePlanetDto) {
     return this.planetService.create(createPlanetDto);
+  }  
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updatePlanetDto: UpdatePlanetDto) {
+    return this.planetService.update(+id, updatePlanetDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.planetService.remove(+id);
   }
 
   @Get()
@@ -21,15 +31,5 @@ export class PlanetController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.planetService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlanetDto: UpdatePlanetDto) {
-    return this.planetService.update(+id, updatePlanetDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.planetService.remove(+id);
   }
 }
