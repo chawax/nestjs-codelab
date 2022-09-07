@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
-export class CreatePlanetDto {
-  @ApiProperty()  
+export class CreateStarshipDto {
+  @ApiProperty()
   @Expose()
   @IsString()
   name: string;
@@ -11,7 +11,12 @@ export class CreatePlanetDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
-  distanceToEarth: number;
+  speed: number;
+  
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  kilometerPrice: number;
 
   @ApiProperty()
   @Expose()

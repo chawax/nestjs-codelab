@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { PlanetModule } from './planet/planet.module';
+import { StarshipModule } from './starship/starship.module';
+import { BookingModule } from './booking/booking.module';
+
+export const GROUP_USER = 'group_user_details';
+export const GROUP_ADMIN_USERS = 'group_all_users';
 
 @Module({
   imports: [
@@ -22,9 +24,11 @@ import { PlanetModule } from './planet/planet.module';
         } as TypeOrmModuleOptions;
       },
     }),    
-    PlanetModule,
+    PlanetModule, 
+    StarshipModule, 
+    BookingModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

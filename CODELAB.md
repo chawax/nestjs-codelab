@@ -5,9 +5,13 @@ nest new {project-name}
 npm run start:dev
 
 npm i --save @nestjs/config
+npm i @nestjs/swagger
 
 npm i --save @nestjs/typeorm typeorm sqlite
 npm i --save sqlite3 
+
+npm install class-validator
+npm install dayjs
 ```
 
 ```ts

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
 import { Planet } from './entities/planet.entity';
@@ -13,25 +13,29 @@ export class PlanetService {
     private readonly planetRepository: Repository<Planet>,
   ) {}
 
-  create(createPlanetDto: CreatePlanetDto) {
-    const planet = plainToInstance(Planet, createPlanetDto);
-    this.planetRepository.save(planet)
-    return 'This action adds a new planet';
+  create(createPlanetDto: CreatePlanetDto): Promise<Planet> {
+    return this.planetRepository.save(createPlanetDto);
   }
 
-  findAll() {
+  update(id: number, updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
+    return this.planetRepository.save({id, ...updatePlanetDto});
+  }
+
+  remove(id: number): Promise<DeleteResult> {
+    return this.planetRepository.delete({ id });
+  }
+
+  findAll(): Promise<Planet[]> {
     return this.planetRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} planet`;
+  findAvailableDestinations(): Promise<Planet[]> {
+    return this.planetRepository.find({
+      where: { active: true },
+    });
   }
 
-  update(id: number, updatePlanetDto: UpdatePlanetDto) {
-    return `This action updates a #${id} planet`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} planet`;
+  findOne(id: number): Promise<Planet> {
+    return this.planetRepository.findOneBy({ id });
   }
 }
