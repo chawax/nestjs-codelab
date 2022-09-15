@@ -36,3 +36,7 @@ lerna-debug.log*
 
 *.sqlite
 .env
+
+# Google Codelabs Tools
+
+codelab/nestjs
