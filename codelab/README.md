@@ -55,18 +55,26 @@ https://github.com/googlecodelabs/tools/tree/main/claat/parser/md
 - Générer le code source du codelab à partir du fichier Markdown
 
     ```
+    cd codelab
     claat export nestjs.md
     ```
+
+> Lors de l'exécution de la commade `claat` il peut arriver que Google demande une authentification. Il faut alors ouvrir dans le navigateur l'URL affichée, se connecter sur son compte Google et copier dans la ligne de commande le code unique généré.
 
 - Lancer le codelab en local
 
     ```
+    cd codelab
     claat serve
     ```
 
-- Le codelab est lancé sur `http://localhost:9090`, il n'y a plus qu'à cliquer sur le lien `nestjs/`
-
+- Le codelab est lancé sur `http://localhost:9090`, il n'y a plus qu'à cliquer sur le lien `nestjs/
 
 ## Déploiement du codelab sur Github.io
 
-TODO
+Pour que les fichiers du codelab puissent être déployés sur Github.io, il faut les copier dans le répertoire `docs` et les pousser sur le repository Github.
+
+    ```
+    cd codelab
+    cp -R nestjs ../docs
+    ```
