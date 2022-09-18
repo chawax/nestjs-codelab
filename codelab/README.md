@@ -10,7 +10,7 @@ L'installation des Google Codelabs Tools nécessite l'installation préalable de
 
 - Installer Go avec Homebrew :
 
-    ```
+    ```bash
     brew install golang
     ```
 
@@ -25,7 +25,7 @@ L'installation des Google Codelabs Tools nécessite l'installation préalable de
 
 - Recharger le bash :
 
-    ```
+    ```bash
     source ~/.zshrc
     ```
 
@@ -37,7 +37,7 @@ L'installation des Google Codelabs Tools nécessite l'installation préalable de
 
 - Vérifier que l'outil `claat` est bien installé :
 
-    ```
+    ```bash
     claat help
     ```
 
@@ -54,7 +54,7 @@ https://github.com/googlecodelabs/tools/tree/main/claat/parser/md
 
 - Générer le code source du codelab à partir du fichier Markdown
 
-    ```
+    ```bash
     cd codelab
     claat export nestjs.md
     ```
@@ -63,7 +63,7 @@ https://github.com/googlecodelabs/tools/tree/main/claat/parser/md
 
 - Lancer le codelab en local
 
-    ```
+    ```bash
     cd codelab
     claat serve
     ```
@@ -74,7 +74,9 @@ https://github.com/googlecodelabs/tools/tree/main/claat/parser/md
 
 Pour que les fichiers du codelab puissent être déployés sur Github.io, il faut les copier dans le répertoire `docs` et les pousser sur le repository Github.
 
-    ```
+    ```bash
     cd codelab
     cp -R nestjs ../docs
     ```
+
+Le compte Github doit être configuré pour faire pointer Github Pages sur le répertoire `/docs` du repository. Le codelab est alors accessible sur l'adresse : `https://chawax.github.io/nestjs-codelab`
