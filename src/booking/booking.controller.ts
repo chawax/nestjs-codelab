@@ -1,12 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, SerializeOptions } from '@nestjs/common';
-import { GROUP_USER } from 'src/app.module';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Booking } from './entities/booking.entity';
 
-@Controller('booking')
+@Controller({ path: '/booking', version: '1' })
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
@@ -26,9 +25,6 @@ export class BookingController {
   }
 
   @Get()
-  @SerializeOptions({
-    groups: [GROUP_USER],
-  })
   findAll(): Promise<Booking[]> {
     return this.bookingService.findAll();
   }

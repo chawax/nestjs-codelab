@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, SerializeOptions, Version } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Version } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { GROUP_ADMIN_USERS } from 'src/app.module';
 import { DeleteResult } from 'typeorm';
 import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
@@ -28,9 +27,6 @@ export class StarshipController {
   }
 
   @Get()
-  @SerializeOptions({
-    groups: [GROUP_ADMIN_USERS],
-  })
   findAll(): Promise<Starship[]> {
     return this.starshipService.findAll();
   }

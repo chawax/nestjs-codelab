@@ -1,6 +1,6 @@
 import { ClassSerializerInterceptor, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule, GROUP_USER } from './app.module';
+import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -23,7 +23,7 @@ async function bootstrap() {
 
   // Enables global behaviors on outgoing entities
   // For examples, @Exclude decorators will be processed
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {groups: [GROUP_USER]}));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   //-------- SWAGGER
   const config = new DocumentBuilder()

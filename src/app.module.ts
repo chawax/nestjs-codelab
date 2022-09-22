@@ -6,9 +6,6 @@ import { PlanetModule } from './planet/planet.module';
 import { StarshipModule } from './starship/starship.module';
 import { BookingModule } from './booking/booking.module';
 
-export const GROUP_USER = 'group_user_details';
-export const GROUP_ADMIN_USERS = 'group_all_users';
-
 @Module({
   imports: [
     ConfigModule.forRoot(),
