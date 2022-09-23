@@ -5,10 +5,9 @@ import { StarshipController } from './starship.controller';
 import { StarshipService } from './starship.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Starship])
-  ],
+  imports: [TypeOrmModule.forFeature([Starship])],
   controllers: [StarshipController],
-  providers: [StarshipService]
+  providers: [StarshipService],
+  exports: [TypeOrmModule.forFeature([Starship])],
 })
 export class StarshipModule {}

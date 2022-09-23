@@ -9,7 +9,7 @@ export class DefaultEntity {
     @Column()
     active: boolean;
 
-    @Column()
+    @Column({ unique: true })
     @Generated("uuid")
     uuid: string;    
 }

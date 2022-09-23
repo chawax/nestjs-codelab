@@ -17,17 +17,17 @@ export class PlanetService {
   }
 
   async update(uuid: string, updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
-    const planet = await this.findOne(uuid);
+    const planet = await this.findOneByUuid(uuid);
 
     if (!planet) {
       throw new NotFoundException();
     }
 
-    return this.planetRepository.save({ uuid, ...updatePlanetDto });
+    return this.planetRepository.save({ id: planet.id, ...updatePlanetDto });
   }
 
   async remove(uuid: string): Promise<DeleteResult> {
-    const planet = await this.findOne(uuid);
+    const planet = await this.findOneByUuid(uuid);
 
     if (!planet) {
       throw new NotFoundException();
@@ -46,7 +46,7 @@ export class PlanetService {
     });
   }
 
-  findOne(uuid: string): Promise<Planet | null> {
+  findOneByUuid(uuid: string): Promise<Planet | null> {
     return this.planetRepository.findOneBy({ uuid });
   }
 }

@@ -7,7 +7,8 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
-  Post, Version
+  Post,
+  Version
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
@@ -23,7 +24,7 @@ export class PlanetController {
 
   @Post()
   create(@Body() createPlanetDto: CreatePlanetDto) {
-    return this.planetService.create(createPlanetDto);    
+    return this.planetService.create(createPlanetDto);
   }
 
   @Patch(':uuid')
@@ -49,8 +50,8 @@ export class PlanetController {
 
   @Get(':uuid')
   async findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Planet> {
-    const planet = await this.planetService.findOne(uuid);    
-    
+    const planet = await this.planetService.findOneByUuid(uuid);
+
     if (planet) {
       return planet;
     }

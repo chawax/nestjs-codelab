@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Version } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Version } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
 import { CreateStarshipDto } from './dto/create-starship.dto';
@@ -16,14 +16,17 @@ export class StarshipController {
     return this.starshipService.create(createStarshipDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: number, @Body() updateStarshipDto: UpdateStarshipDto): Promise<Starship> {
-    return this.starshipService.update(id, updateStarshipDto);
+  @Patch(':uuid')
+  update(
+    @Param('uuid', new ParseUUIDPipe()) uuid: string,
+    @Body() updateStarshipDto: UpdateStarshipDto,
+  ): Promise<Starship> {
+    return this.starshipService.update(uuid, updateStarshipDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: number): Promise<DeleteResult> {
-    return this.starshipService.remove(id);
+  @Delete(':uuid')
+  remove(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<DeleteResult> {
+    return this.starshipService.remove(uuid);
   }
 
   @Get()
@@ -37,8 +40,8 @@ export class StarshipController {
     return this.starshipService.findAvailableStarships();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number): Promise<Starship> {
-    return this.starshipService.findOne(+id);
+  @Get(':uuid')
+  findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Starship> {
+    return this.starshipService.findOneByUuid(uuid);
   }
 }

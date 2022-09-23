@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Booking } from './entities/booking.entity';
 
-@Controller({ path: '/booking', version: '1' })
+@Controller({ path: '/bookings', version: '1' })
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
@@ -14,14 +14,14 @@ export class BookingController {
     return this.bookingService.create(createBookingDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: number, @Body() updateBookingDto: UpdateBookingDto): Promise<Booking> {
-    return this.bookingService.update(id, updateBookingDto);
+  @Patch(':uuid')
+  update(@Param('uuid', new ParseUUIDPipe()) uuid: string, @Body() updateBookingDto: UpdateBookingDto): Promise<Booking> {
+    return this.bookingService.update(uuid, updateBookingDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: number): Promise<DeleteResult> {
-    return this.bookingService.remove(id);
+  @Delete(':uuid')
+  remove(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<DeleteResult> {
+    return this.bookingService.remove(uuid);
   }
 
   @Get()
@@ -29,8 +29,8 @@ export class BookingController {
     return this.bookingService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: number): Promise<Booking> {
-    return this.bookingService.findOne(id);
+  @Get(':uuid')
+  findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Booking> {
+    return this.bookingService.findOneByUuid(uuid);
   }
 }

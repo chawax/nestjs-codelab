@@ -6,10 +6,9 @@ import { PlanetController } from './planet.controller';
 import { PlanetService } from './planet.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Planet])
-  ],
+  imports: [TypeOrmModule.forFeature([Planet])],
   controllers: [PlanetController],
   providers: [PlanetService],
+  exports: [TypeOrmModule.forFeature([Planet])],
 })
 export class PlanetModule {}
