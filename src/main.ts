@@ -2,9 +2,15 @@ import { ClassSerializerInterceptor, ValidationPipe, VersioningType } from '@nes
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { BearerGuard } from './security/guards/bearer.guard';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get<ConfigService>(ConfigService);
+
+  // SECURITY
+  app.useGlobalGuards(new BearerGuard(configService));
 
   // VERSIONNING
   app.enableVersioning({
