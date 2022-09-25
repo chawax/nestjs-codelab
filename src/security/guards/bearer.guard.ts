@@ -15,7 +15,7 @@ export class BearerGuard implements CanActivate {
       return true;
     }
 
-    this.logger.warn(`An unauthorized call has been made on a Quable webhook`);
+    this.logger.warn(`An unauthorized call has been made on a API endpoint`);
     return false;
   }
 }
