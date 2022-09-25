@@ -1,10 +1,13 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Booking } from './entities/booking.entity';
 
+@ApiTags('bookings')
+@ApiBearerAuth()
 @Controller({ path: '/bookings', version: '1' })
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
@@ -15,7 +18,10 @@ export class BookingController {
   }
 
   @Patch(':uuid')
-  update(@Param('uuid', new ParseUUIDPipe()) uuid: string, @Body() updateBookingDto: UpdateBookingDto): Promise<Booking> {
+  update(
+    @Param('uuid', new ParseUUIDPipe()) uuid: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+  ): Promise<Booking> {
     return this.bookingService.update(uuid, updateBookingDto);
   }
 

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Version } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
 import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
@@ -7,6 +7,7 @@ import { Starship } from './entities/starship.entity';
 import { StarshipService } from './starship.service';
 
 @ApiTags('starships')
+@ApiBearerAuth()
 @Controller({ path: '/starships', version: '1' })
 export class StarshipController {
   constructor(private readonly starshipService: StarshipService) {}

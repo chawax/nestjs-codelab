@@ -36,6 +36,7 @@ async function bootstrap() {
     .setTitle('Form Earth to Moon API')
     .setDescription('A codelab to discover NestJs and more')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
