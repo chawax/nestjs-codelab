@@ -14,22 +14,26 @@ export class BookingService {
     private readonly bookingRepository: Repository<Booking>,
     private readonly planetService: PlanetService,
     private readonly starshipService: StarshipService,
-  ) {}
+  ) { }
 
-  async create(createBookingDto: CreateBookingDto): Promise<Booking> {    
-    const destination = await this.planetService.findOneByUuid(createBookingDto.destination.uuid);
-    const starship = await this.starshipService.findOneByUuid(createBookingDto.starship.uuid);
+  async create(createBookingDto: CreateBookingDto): Promise<Booking> {
+    const destination = await this.planetService.findOneByUuid(createBookingDto.destinationUuid);
+    const starship = await this.starshipService.findOneByUuid(createBookingDto.starshipUuid);
 
     if (!destination || !starship) {
       throw new UnprocessableEntityException('Both destination and starship should contains existing uuids');
     }
 
-    createBookingDto.destination = destination;
-    createBookingDto.starship = starship;
+    const booking: Booking = new Booking()
+    booking.active = createBookingDto.active
+    booking.departureDate = createBookingDto.departureDate
+    booking.traveller = createBookingDto.traveller
+    booking.destination = destination;
+    booking.starship = starship;
 
-    return this.bookingRepository.save(createBookingDto);
+    return this.bookingRepository.save(booking);
   }
-  
+
   async update(uuid: string, updateBookingDto: UpdateBookingDto): Promise<Booking> {
     const booking = await this.findOneByUuid(uuid);
 
@@ -37,21 +41,33 @@ export class BookingService {
       throw new NotFoundException();
     }
 
-    const destination = await this.planetService.findOneByUuid(updateBookingDto.destination.uuid);
-    const starship = await this.starshipService.findOneByUuid(updateBookingDto.starship.uuid);
+    if (updateBookingDto.destinationUuid) {
+      const destination = await this.planetService.findOneByUuid(updateBookingDto.destinationUuid);
+      if (!destination) {
+        throw new UnprocessableEntityException('The provided destination UUID doesn\'t map to an existing destination');
+      }
 
-    if (!destination || !starship) {
-      throw new UnprocessableEntityException('Both destination and starship should contains existing uuids');
+      booking.destination = destination;
     }
 
-    updateBookingDto.destination = destination;
-    updateBookingDto.starship = starship;
+    if (updateBookingDto.starshipUuid) {
+      const starship = await this.starshipService.findOneByUuid(updateBookingDto.starshipUuid);
+      if (!starship) {
+        throw new UnprocessableEntityException('The provided starship UUID doesn\'t map to an existing starship');
+      }
 
-    return this.bookingRepository.save({id: booking.id, ...updateBookingDto});
+      booking.starship = starship;
+    }
+
+    booking.active = updateBookingDto.active
+    booking.departureDate = updateBookingDto.departureDate
+    booking.traveller = updateBookingDto.traveller
+
+    return this.bookingRepository.save(booking);
   }
 
   remove(uuid: string): Promise<DeleteResult> {
-    return this.bookingRepository.delete({uuid});
+    return this.bookingRepository.delete({ uuid });
   }
 
   findAll(): Promise<Booking[]> {
@@ -59,6 +75,6 @@ export class BookingService {
   }
 
   findOneByUuid(uuid: string): Promise<Booking> {
-    return this.bookingRepository.findOne({where: {uuid},  relations: ['starship', 'destination'] });
+    return this.bookingRepository.findOne({ where: { uuid }, relations: ['starship', 'destination'] });
   }
 }
