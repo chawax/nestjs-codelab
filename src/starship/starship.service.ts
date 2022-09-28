@@ -10,7 +10,7 @@ export class StarshipService {
   constructor(
     @InjectRepository(Starship)
     private readonly starshipRepository: Repository<Starship>,
-  ) {}
+  ) { }
 
   create(createStarshipDto: CreateStarshipDto): Promise<Starship> {
     return this.starshipRepository.save(createStarshipDto);
@@ -23,7 +23,9 @@ export class StarshipService {
       throw new NotFoundException();
     }
 
-    return this.starshipRepository.save({ id: starship.id, ...updateStarshipDto });
+    await this.starshipRepository.save({ id: starship.id, ...updateStarshipDto });
+
+    return this.findOneByUuid(uuid);
   }
 
   async remove(uuid: string): Promise<DeleteResult> {
@@ -45,8 +47,8 @@ export class StarshipService {
       where: { active: true },
     });
   }
-  
+
   findOneByUuid(uuid: string): Promise<Starship | null> {
-    return this.starshipRepository.findOneBy({uuid});
+    return this.starshipRepository.findOneBy({ uuid });
   }
 }

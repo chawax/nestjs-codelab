@@ -10,7 +10,7 @@ export class PlanetService {
   constructor(
     @InjectRepository(Planet)
     private readonly planetRepository: Repository<Planet>,
-  ) {}
+  ) { }
 
   create(createPlanetDto: CreatePlanetDto): Promise<Planet> {
     return this.planetRepository.save(createPlanetDto);
@@ -23,7 +23,9 @@ export class PlanetService {
       throw new NotFoundException();
     }
 
-    return this.planetRepository.save({ id: planet.id, ...updatePlanetDto });
+    await this.planetRepository.save({ id: planet.id, ...updatePlanetDto })
+
+    return this.findOneByUuid(uuid);
   }
 
   async remove(uuid: string): Promise<DeleteResult> {
