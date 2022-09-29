@@ -1,6 +1,5 @@
-import { Booking } from 'src/booking/entities/booking.entity';
 import { DefaultEntity } from 'src/utils/default-entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'planet' })
 export class Planet extends DefaultEntity {
@@ -9,7 +8,4 @@ export class Planet extends DefaultEntity {
 
   @Column()
   distanceToEarth: number;
-
-  @OneToMany(() => Booking, (booking) => booking.destination)
-  bookings: Planet[];
 }

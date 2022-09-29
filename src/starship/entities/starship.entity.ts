@@ -1,9 +1,8 @@
-import { Booking } from "src/booking/entities/booking.entity";
 import { DefaultEntity } from "src/utils/default-entity";
-import { Column, Entity, OneToMany } from "typeorm";
+import { Column, Entity } from "typeorm";
 
 @Entity({ name: 'starship' })
-export class Starship extends DefaultEntity {    
+export class Starship extends DefaultEntity {
     @Column()
     name: string;
 
@@ -12,7 +11,4 @@ export class Starship extends DefaultEntity {
 
     @Column()
     kilometerPrice: number;
-
-    @OneToMany(() => Booking, (booking) => booking.starship)
-    bookings: Starship[];
 }
