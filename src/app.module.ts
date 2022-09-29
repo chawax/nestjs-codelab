@@ -1,13 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { BookingModule } from './booking/booking.module';
 import { PlanetModule } from './planet/planet.module';
 import { StarshipModule } from './starship/starship.module';
-import { BookingModule } from './booking/booking.module';
-
-export const GROUP_USER = 'group_user_details';
-export const GROUP_ADMIN_USERS = 'group_all_users';
 
 @Module({
   imports: [
@@ -16,16 +12,16 @@ export const GROUP_ADMIN_USERS = 'group_all_users';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        return {          
+        return {
           type: 'sqlite',
           database: configService.get('SQL_MEMORY_DB_SHARED'),
-          entities: [__dirname + "/**/*.entity{.ts,.js}"],
-          synchronize: true
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: true,
         } as TypeOrmModuleOptions;
       },
-    }),    
-    PlanetModule, 
-    StarshipModule, 
+    }),
+    PlanetModule,
+    StarshipModule,
     BookingModule,
   ],
   controllers: [],

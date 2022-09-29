@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreatePlanetDto {
-  @ApiProperty()  
+  @ApiProperty()
   @Expose()
   @IsString()
   name: string;

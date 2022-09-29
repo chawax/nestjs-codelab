@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsDate, IsNumber, IsObject, IsString } from 'class-validator';
-import { Planet } from 'src/planet/entities/planet.entity';
-import { Starship } from 'src/starship/entities/starship.entity';
+import { IsBoolean, IsDate, IsString, IsUUID } from 'class-validator';
 
 export class CreateBookingDto {
   @ApiProperty()
@@ -12,13 +10,13 @@ export class CreateBookingDto {
 
   @ApiProperty()
   @Expose()
-  @IsObject()
-  destination: any;
-  
+  @IsUUID()
+  destinationUuid: string;
+
   @ApiProperty()
   @Expose()
-  @IsObject()
-  starship: any;
+  @IsUUID()
+  starshipUuid: string;
 
   @ApiProperty()
   @Expose()

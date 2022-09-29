@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { CreateStarshipDto } from './dto/create-starship.dto';
@@ -10,18 +10,32 @@ export class StarshipService {
   constructor(
     @InjectRepository(Starship)
     private readonly starshipRepository: Repository<Starship>,
-  ) {}
+  ) { }
 
   create(createStarshipDto: CreateStarshipDto): Promise<Starship> {
     return this.starshipRepository.save(createStarshipDto);
   }
 
-  update(id: number, updateStarshipDto: UpdateStarshipDto): Promise<Starship> {
-    return this.starshipRepository.save({id, ...updateStarshipDto});
+  async update(uuid: string, updateStarshipDto: UpdateStarshipDto): Promise<Starship> {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    await this.starshipRepository.save({ id: starship.id, ...updateStarshipDto });
+
+    return this.findOneByUuid(uuid);
   }
 
-  remove(id: number): Promise<DeleteResult> {
-    return this.starshipRepository.delete({id});
+  async remove(uuid: string): Promise<DeleteResult> {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    return this.starshipRepository.delete({ uuid });
   }
 
   findAll(): Promise<Starship[]> {
@@ -34,7 +48,7 @@ export class StarshipService {
     });
   }
 
-  findOne(id: number): Promise<Starship> {
-    return this.starshipRepository.findOneBy({id});
+  findOneByUuid(uuid: string): Promise<Starship | null> {
+    return this.starshipRepository.findOneBy({ uuid });
   }
 }
