@@ -2,7 +2,7 @@ id:nestjs
 
 # De la Terre à la Lune (et au-delà) avec NestJS
 
-## Step 1
+## Step 1 - ODA
 Duration: 5:30
 
 Instructions pour installer le projet et vérifier que tout fonctionne.
@@ -11,16 +11,15 @@ Instructions pour installer le projet et vérifier que tout fonctionne.
 git clone https://github.com/chawax/nestjs-codelab.git
 ```
 
-## Step 2
+## Step 2 - ODA
 Duration: 10:00
 
 Un premier contrôleur de type `health` :
 - Utilisation du CLI Nest
 - Initialisation de Swagger
 - Utilisation des versions
-- Tests unitaires ?
 
-## Step 3
+## Step 3 - ODA
 Duration: 20:00
 
 Un deuxième contrôleur plus évolué :
@@ -28,29 +27,32 @@ Un deuxième contrôleur plus évolué :
 - Puis on enrichit le contrôleur de récupération des planètes
 - Création dans un premier temps d'une liste "mockée"
 
-La même chose pour les ressources `starship` et `booking`
+La même chose pour la ressource `starship`.
 
-## Step 4
+## Step 4 - ODA
 Duration: 10:00
 
-Intégration de TypeORM
+Intégration de TypeORM pour les ressources `planet` et `starship`
 
 En lecture dans un premier temps
 
-## Step 5
+## Step 5 - ODA
 Duration: 10:00
 
 Ecriture en base
 
-Objets DTO pour la création / modification avec utilisation de `PartialType`.
+Objets DTO pour la création / modification avec utilisation de `PartialType` pour `starship` et `planet`
 
+# Step 6 - OTH
 
-## Step 6
+Création de la ressource `booking`
+
+## Step 7 - OTH
 Duration: 10:00
 
 Ajout du bearer guard
 
-## Step 7
+## Step 8 - OTH
 Duration: 10:00
 
 Gestion de la configuration
