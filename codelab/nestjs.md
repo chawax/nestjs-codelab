@@ -2,13 +2,39 @@ id:nestjs
 
 # De la Terre à la Lune (et au-delà) avec NestJS
 
-## Step 1 - ODA
+## Récupération du projet et installation des outils
 Duration: 5:30
 
-Instructions pour installer le projet et vérifier que tout fonctionne.
+Prérequis :
+
+- [Git](https://git-scm.com/)
+- [Node / npm](https://nodejs.org/)
+- [Visual Studio Code](https://code.visualstudio.com/) (ou tout autre IDE JS)
+
+
+Installer [Nest CLI](https://docs.nestjs.com/cli/overview) :
+
+```bash
+npm install -g @nestjs/cli
+```
+
+Vérifier le bon fonctionnement :
+
+```bash
+nest -v
+```
+
+Récupérer le code du projet :
 
 ```bash
 git clone https://github.com/chawax/nestjs-codelab.git
+```
+
+Installer les dépendances npm :
+
+```bash
+cd nestjs-codelab
+npm i
 ```
 
 ## Step 2 - ODA
