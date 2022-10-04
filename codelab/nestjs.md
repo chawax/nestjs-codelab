@@ -258,10 +258,88 @@ findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Booking> {
 }
 ```
 
-## Sécurisation des contrôleurs (OTH)
+## Sécurisation des contrôleurs
 Duration: 10:00
 
-Ajout du bearer guard
+Nous allons sécuriser l'accès à nos endoints en exigeant la fourniture d'un bearer d'authentification dans les headers des requêtes. Nous allons créer un "guard", un composant NestJS qui permet de contrôler l'accès à des routes.
+
+Dans le fichier `.env` ajouter la variable d'environnement `API_BEARER` qui définit la valeur attendue pour le bearer :
+
+```
+API_BEARER=MyBearer
+```
+
+Créer un nouveau module `security` :
+
+```bash
+nest g module security
+```
+
+Créer un guard dans ce module :
+
+```bash
+nest g guard security/bearer
+```
+
+Compléter le code du guard comme ci-dessous :
+
+```ts
+import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class BearerGuard implements CanActivate {
+  private readonly logger = new Logger(BearerGuard.name);
+
+  constructor(private configService: ConfigService) {}
+
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest();
+
+    if (request?.headers?.authorization === `Bearer ${this.configService.get<string>('API_BEARER')}`) {
+      return true;
+    }
+
+    this.logger.warn(`An unauthorized call has been made on a API endpoint`);
+    return false;
+  }
+}
+```
+
+Quelques explications :
+- L'interface `CanActivate` permet d'activer ou non une route en fonction du résultat de la méthode `canActivate`
+- On contrôle la présence d'un header `authorization` avec comme valeur attendue celle saisie dans le fichier `.env`, récupérée grâce au service `ConfigService.
+
+Activons maintenant ce guard pour l'ensemble des routes de l'application en ajoutant les lignes suivantes dans le fichier `main.ts` : 
+
+```ts
+app.useGlobalGuards(new BearerGuard(configService));
+```
+
+Nous devons maintenant configurer Swagger pour activer la saisie du header `authorization` dans Swagger UI.
+
+Toujours dans le fichier `main.ts` modifier la configuration de Swagger en faisant appel à la méthode `addBearerAuth`.
+
+```ts
+const config = new DocumentBuilder()
+    .setTitle('Form Earth to Moon API')
+    .setDescription('A codelab to discover NestJs and more')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+```
+
+Enfin sur chacun des contrôleurs ajouter le décorateur `@ApiBearerAuth` importé de Swagger. Par exemple dans `BookingController` :
+
+```ts
+@ApiTags('bookings')
+@ApiBearerAuth()
+@Controller({ path: '/bookings', version: '1' })
+export class BookingController {
+```
+
+Il ne reste plus qu'à lancer Swagger UI. Tester les services sans bearer et se rendre compte qu'on a une erreur 403. Puis cliquer sur le bouton `Authenticate`, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.
 
 ## Step 8 - OTH
 Duration: 10:00

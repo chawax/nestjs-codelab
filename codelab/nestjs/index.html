@@ -253,8 +253,64 @@ findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Bo
 
       </google-codelab-step>
     
-      <google-codelab-step label="Sécurisation des contrôleurs (OTH)" duration="10">
-        <p>Ajout du bearer guard</p>
+      <google-codelab-step label="Sécurisation des contrôleurs" duration="10">
+        <p>Nous allons sécuriser l&#39;accès à nos endoints en exigeant la fourniture d&#39;un bearer d&#39;authentification dans les headers des requêtes. Nous allons créer un &#34;guard&#34;, un composant NestJS qui permet de contrôler l&#39;accès à des routes.</p>
+<p>Dans le fichier <code>.env</code> ajouter la variable d&#39;environnement <code>API_BEARER</code> qui définit la valeur attendue pour le bearer :</p>
+<pre><code>API_BEARER=MyBearer
+</code></pre>
+<p>Créer un nouveau module <code>security</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g module security
+</code></pre>
+<p>Créer un guard dans ce module :</p>
+<pre><code language="language-bash" class="language-bash">nest g guard security/bearer
+</code></pre>
+<p>Compléter le code du guard comme ci-dessous :</p>
+<pre><code language="language-ts" class="language-ts">import { CanActivate, ExecutionContext, Injectable, Logger } from &#39;@nestjs/common&#39;;
+import { ConfigService } from &#39;@nestjs/config&#39;;
+import { Observable } from &#39;rxjs&#39;;
+
+@Injectable()
+export class BearerGuard implements CanActivate {
+  private readonly logger = new Logger(BearerGuard.name);
+
+  constructor(private configService: ConfigService) {}
+
+  canActivate(context: ExecutionContext): boolean | Promise&lt;boolean&gt; | Observable&lt;boolean&gt; {
+    const request = context.switchToHttp().getRequest();
+
+    if (request?.headers?.authorization === `Bearer ${this.configService.get&lt;string&gt;(&#39;API_BEARER&#39;)}`) {
+      return true;
+    }
+
+    this.logger.warn(`An unauthorized call has been made on a API endpoint`);
+    return false;
+  }
+}
+</code></pre>
+<p>Quelques explications :</p>
+<ul>
+<li>L&#39;interface <code>CanActivate</code> permet d&#39;activer ou non une route en fonction du résultat de la méthode <code>canActivate</code></li>
+<li>On contrôle la présence d&#39;un header <code>authorization</code> avec comme valeur attendue celle saisie dans le fichier <code>.env</code>, récupérée grâce au service `ConfigService.</li>
+</ul>
+<p>Activons maintenant ce guard pour l&#39;ensemble des routes de l&#39;application en ajoutant les lignes suivantes dans le fichier <code>main.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">app.useGlobalGuards(new BearerGuard(configService));
+</code></pre>
+<p>Nous devons maintenant configurer Swagger pour activer la saisie du header <code>authorization</code> dans Swagger UI.</p>
+<p>Toujours dans le fichier <code>main.ts</code> modifier la configuration de Swagger en faisant appel à la méthode <code>addBearerAuth</code>.</p>
+<pre><code language="language-ts" class="language-ts">const config = new DocumentBuilder()
+    .setTitle(&#39;Form Earth to Moon API&#39;)
+    .setDescription(&#39;A codelab to discover NestJs and more&#39;)
+    .setVersion(&#39;1.0&#39;)
+    .addBearerAuth()
+    .build();
+</code></pre>
+<p>Enfin sur chacun des contrôleurs ajouter le décorateur <code>@ApiBearerAuth</code> importé de Swagger. Par exemple dans <code>BookingController</code> :</p>
+<pre><code language="language-ts" class="language-ts">@ApiTags(&#39;bookings&#39;)
+@ApiBearerAuth()
+@Controller({ path: &#39;/bookings&#39;, version: &#39;1&#39; })
+export class BookingController {
+</code></pre>
+<p>Il ne reste plus qu&#39;à lancer Swagger UI. Tester les services sans bearer et se rendre compte qu&#39;on a une erreur 403. Puis cliquer sur le bouton <code>Authenticate</code>, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.</p>
 
 
       </google-codelab-step>
