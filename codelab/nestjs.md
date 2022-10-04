@@ -37,13 +37,74 @@ cd nestjs-codelab
 npm i
 ```
 
-## Step 2 - ODA
+## Première API
 Duration: 10:00
 
-Un premier contrôleur de type `health` :
-- Utilisation du CLI Nest
-- Initialisation de Swagger
-- Utilisation des versions
+Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.
+
+La première route de notre API consiste à donner l'état de santé de notre application.
+
+Créons le module `health` :
+
+```bash
+nest g module health
+```
+
+Créons le controller `health` :
+
+```bash
+nest g controller health
+```
+
+Dans le fichier `src\health\health.controller.ts` du controller, rajoutons la méthode `check` qui répondra au requête de type `GET` :
+
+```ts
+@Get()
+check(): string {
+    return 'Everything is OK';
+}
+```
+
+L'IDE nous aide à rajouter les import de librairies nécessaires.
+
+Vérifions que tout fonctionne :
+
+```bash
+npm run start:dev
+```
+
+La route `health` est accessible dans un navigateur via [http://localhost:3000/health](http://localhost:3000/health).
+
+Nous allons maitenant activer le versionning d'API et la documentation Swagger.
+
+Dans `src\main.ts`, rajoutons la configuration nécessaire :
+
+```ts
+  // VERSIONNING
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
+
+  //-------- SWAGGER
+  const config = new DocumentBuilder()
+    .setTitle('Form Earth to Moon API')
+    .setDescription('A codelab to discover NestJs and more')
+    .setVersion('1.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+```
+
+Modifions `HealthController` pour rajouter un numéro de version sur son API :
+
+```ts
+@Controller({ path: '/health', version: '1' })
+```
+
+L'URL de la route `health` est maintenant [http://localhost:3000/v1/health](http://localhost:3000/v1/health).
+
+L'interface Swagger est accessible via [http://localhost:3000/api](http://localhost:3000/api). Nous pouvons y tester notre API.
 
 ## Step 3 - ODA
 Duration: 20:00

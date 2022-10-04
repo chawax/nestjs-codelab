@@ -27,21 +27,72 @@
                   environment="web"
                   feedback-link="">
     
-      <google-codelab-step label="Step 1 - ODA" duration="6">
-        <p>Instructions pour installer le projet et vérifier que tout fonctionne.</p>
+      <google-codelab-step label="Récupération du projet et installation des outils" duration="6">
+        <p>Prérequis :</p>
+<ul>
+<li><a href="https://git-scm.com/" target="_blank">Git</a></li>
+<li><a href="https://nodejs.org/" target="_blank">Node / npm</a></li>
+<li><a href="https://code.visualstudio.com/" target="_blank">Visual Studio Code</a> (ou tout autre IDE JS)</li>
+</ul>
+<p>Installer <a href="https://docs.nestjs.com/cli/overview" target="_blank">Nest CLI</a> :</p>
+<pre><code language="language-bash" class="language-bash">npm install -g @nestjs/cli
+</code></pre>
+<p>Vérifier le bon fonctionnement :</p>
+<pre><code language="language-bash" class="language-bash">nest -v
+</code></pre>
+<p>Récupérer le code du projet :</p>
 <pre><code language="language-bash" class="language-bash">git clone https://github.com/chawax/nestjs-codelab.git
+</code></pre>
+<p>Installer les dépendances npm :</p>
+<pre><code language="language-bash" class="language-bash">cd nestjs-codelab
+npm i
 </code></pre>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 2 - ODA" duration="10">
-        <p>Un premier contrôleur de type <code>health</code> :</p>
-<ul>
-<li>Utilisation du CLI Nest</li>
-<li>Initialisation de Swagger</li>
-<li>Utilisation des versions</li>
-</ul>
+      <google-codelab-step label="Première API" duration="10">
+        <p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
+<p>La première route de notre API consiste à donner l&#39;état de santé de notre application.</p>
+<p>Créons le module <code>health</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g module health
+</code></pre>
+<p>Créons le controller <code>health</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g controller health
+</code></pre>
+<p>Dans le fichier <code>src\health\health.controller.ts</code> du controller, rajoutons la méthode <code>check</code> qui répondra au requête de type <code>GET</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Get()
+check(): string {
+    return &#39;Everything is OK&#39;;
+}
+</code></pre>
+<p>L&#39;IDE nous aide à rajouter les import de librairies nécessaires.</p>
+<p>Vérifions que tout fonctionne :</p>
+<pre><code language="language-bash" class="language-bash">npm run start:dev
+</code></pre>
+<p>La route <code>health</code> est accessible dans un navigateur via <a href="http://localhost:3000/health" target="_blank">http://localhost:3000/health</a>.</p>
+<p>Nous allons maitenant activer le versionning d&#39;API et la documentation Swagger.</p>
+<p>Dans <code>src\main.ts</code>, rajoutons la configuration nécessaire :</p>
+<pre><code language="language-ts" class="language-ts">  // VERSIONNING
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
+
+  //-------- SWAGGER
+  const config = new DocumentBuilder()
+    .setTitle(&#39;Form Earth to Moon API&#39;)
+    .setDescription(&#39;A codelab to discover NestJs and more&#39;)
+    .setVersion(&#39;1.0&#39;)
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(&#39;api&#39;, app, document);
+</code></pre>
+<p>Modifions <code>HealthController</code> pour rajouter un numéro de version sur son API :</p>
+<pre><code language="language-ts" class="language-ts">@Controller({ path: &#39;/health&#39;, version: &#39;1&#39; })
+</code></pre>
+<p>L&#39;URL de la route <code>health</code> est maintenant <a href="http://localhost:3000/v1/health" target="_blank">http://localhost:3000/v1/health</a>.</p>
+<p>L&#39;interface Swagger est accessible via <a href="http://localhost:3000/api" target="_blank">http://localhost:3000/api</a>. Nous pouvons y tester notre API.</p>
 
 
       </google-codelab-step>

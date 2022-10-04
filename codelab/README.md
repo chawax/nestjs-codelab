@@ -76,7 +76,7 @@ Pour que les fichiers du codelab puissent être déployés sur Github.io, il fau
 
     ```bash
     cd codelab
-    cp -R nestjs ../docs
+    cp -R nestjs/* ../docs
     ```
 
 Le compte Github doit être configuré pour faire pointer Github Pages sur le répertoire `/docs` du repository. Le codelab est alors accessible sur l'adresse : `https://chawax.github.io/nestjs-codelab`
