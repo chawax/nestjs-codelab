@@ -106,15 +106,119 @@ L'URL de la route `health` est maintenant [http://localhost:3000/v1/health](http
 
 L'interface Swagger est accessible via [http://localhost:3000/api](http://localhost:3000/api). Nous pouvons y tester notre API.
 
-## Step 3 - ODA
+## Ressources Planet et Starship
 Duration: 20:00
 
-Un deuxième contrôleur plus évolué :
-- Utilisation du CLI pour créer une nouvelle ressource `planet` 
-- Puis on enrichit le contrôleur de récupération des planètes
-- Création dans un premier temps d'une liste "mockée"
+Nous allons maintenant créer une API pour la gestion de planètes.
+Pour ce faire, nous allons créer des classes [controller](https://docs.nestjs.com/controllers), [service](https://docs.nestjs.com/providers#services), DTO et entity et placer le tout dans un module dédié.
 
-La même chose pour la ressource `starship`.
+Tout cela peut être préparé avec la commande suivante :
+
+```bash
+nest g resource planet
+```
+
+Choisissons `REST API` dans la liste proposée de couches de transport. Nous activons également la génération des points d'entrée CRUD.
+
+
+Dans la classe entity `src\planet\entities\planet.entity.ts`, ajoutons les propriétés d'une planète :
+
+```ts
+name: string;
+
+distanceToEarth: number;
+```
+
+Dans la class service `src\planet\planet.service.ts`, modifions la méthode `findAll()` pour renvoyer des données en dur :
+```ts
+findAll(): Planet[] {
+    const planetsJSON = [
+      {
+        name: 'Lune',
+        distanceToEarth: 384400,
+      },
+      {
+        name: 'Venus',
+        distanceToEarth: 41400000,
+      },
+      {
+        name: 'Mars',
+        distanceToEarth: 78340000,
+      },
+      {
+        name: 'Mercure',
+        distanceToEarth: 91690000,
+      },
+      {
+        name: 'Jupiter',
+        distanceToEarth: 628730000,
+      },
+      {
+        name: 'Saturne',
+        distanceToEarth: 1275000000,
+      },
+      {
+        name: 'Uranus',
+        distanceToEarth: 2723950000,
+      },
+      {
+        name: 'Neptune',
+        distanceToEarth: 4351400000,
+      },
+    ];
+
+    const planets: Planet[] = Object.assign(new Array<Planet>(), planetsJSON);
+
+    return planets;
+  }
+```
+
+Nous pouvons tester la route qui liste toutes les planètes via Swagger ou via son URL : [http://localhost:3000/planet](http://localhost:3000/planet).
+
+Faisons maintenant de même pour la ressource `starship` :
+
+```bash
+nest g resource starship
+```
+
+Ajoutons les proprietés d'un `starship` :
+
+```ts
+name: string;
+
+speed: number;
+
+kilometerPrice: number;
+```
+
+Modifions la méthode `findAll()` de l'entité `starship` pour renvoyer des données en dur :
+```ts
+findAll(): Starship[] {
+    const starshipsJSON = [
+      {
+        name: 'Apollo',
+        speed: 39000,
+        kilometerPrice: 10000,
+      },
+      {
+        name: 'SpaceX Starship',
+        speed: 27000,
+        kilometerPrice: 250000,
+      },
+      {
+        name: 'Sonde Parker',
+        speed: 532000,
+        kilometerPrice: 50000,
+      },
+    ];
+
+    const starships: Starship[] = Object.assign(new Array<Starship>(), starshipsJSON);
+
+    return starships;
+  }
+```
+
+De même que pour `planet`, la route qui liste tous les vaisseaux peut être testée via Swagger ou via son URL : [http://localhost:3000/starship](http://localhost:3000/starship).
 
 ## Step 4 - ODA
 Duration: 10:00

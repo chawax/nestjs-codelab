@@ -97,14 +97,96 @@ check(): string {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 3 - ODA" duration="20">
-        <p>Un deuxième contrôleur plus évolué :</p>
-<ul>
-<li>Utilisation du CLI pour créer une nouvelle ressource <code>planet</code></li>
-<li>Puis on enrichit le contrôleur de récupération des planètes</li>
-<li>Création dans un premier temps d&#39;une liste &#34;mockée&#34;</li>
-</ul>
-<p>La même chose pour la ressource <code>starship</code>.</p>
+      <google-codelab-step label="Ressources Planet et Starship" duration="20">
+        <p>Nous allons maintenant créer une API pour la gestion de planètes. Pour ce faire, nous allons créer des classes <a href="https://docs.nestjs.com/controllers" target="_blank">controller</a>, <a href="https://docs.nestjs.com/providers#services" target="_blank">service</a>, DTO et entity et placer le tout dans un module dédié.</p>
+<p>Tout cela peut être préparé avec la commande suivante :</p>
+<pre><code language="language-bash" class="language-bash">nest g resource planet
+</code></pre>
+<p>Choisissons <code>REST API</code> dans la liste proposée de couches de transport. Nous activons également la génération des points d&#39;entrée CRUD.</p>
+<p>Dans la classe entity <code>src\planet\entities\planet.entity.ts</code>, ajoutons les propriétés d&#39;une planète :</p>
+<pre><code language="language-ts" class="language-ts">name: string;
+
+distanceToEarth: number;
+</code></pre>
+<p>Dans la class service <code>src\planet\planet.service.ts</code>, modifions la méthode <code>findAll()</code> pour renvoyer des données en dur :</p>
+<pre><code language="language-ts" class="language-ts">findAll(): Planet[] {
+    const planetsJSON = [
+      {
+        name: &#39;Lune&#39;,
+        distanceToEarth: 384400,
+      },
+      {
+        name: &#39;Venus&#39;,
+        distanceToEarth: 41400000,
+      },
+      {
+        name: &#39;Mars&#39;,
+        distanceToEarth: 78340000,
+      },
+      {
+        name: &#39;Mercure&#39;,
+        distanceToEarth: 91690000,
+      },
+      {
+        name: &#39;Jupiter&#39;,
+        distanceToEarth: 628730000,
+      },
+      {
+        name: &#39;Saturne&#39;,
+        distanceToEarth: 1275000000,
+      },
+      {
+        name: &#39;Uranus&#39;,
+        distanceToEarth: 2723950000,
+      },
+      {
+        name: &#39;Neptune&#39;,
+        distanceToEarth: 4351400000,
+      },
+    ];
+
+    const planets: Planet[] = Object.assign(new Array&lt;Planet&gt;(), planetsJSON);
+
+    return planets;
+  }
+</code></pre>
+<p>Nous pouvons tester la route qui liste toutes les planètes via Swagger ou via son URL : <a href="http://localhost:3000/planet" target="_blank">http://localhost:3000/planet</a>.</p>
+<p>Faisons maintenant de même pour la ressource <code>starship</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g resource starship
+</code></pre>
+<p>Ajoutons les proprietés d&#39;un <code>starship</code> :</p>
+<pre><code language="language-ts" class="language-ts">name: string;
+
+speed: number;
+
+kilometerPrice: number;
+</code></pre>
+<p>Modifions la méthode <code>findAll()</code> de l&#39;entité <code>starship</code> pour renvoyer des données en dur :</p>
+<pre><code language="language-ts" class="language-ts">findAll(): Starship[] {
+    const starshipsJSON = [
+      {
+        name: &#39;Apollo&#39;,
+        speed: 39000,
+        kilometerPrice: 10000,
+      },
+      {
+        name: &#39;SpaceX Starship&#39;,
+        speed: 27000,
+        kilometerPrice: 250000,
+      },
+      {
+        name: &#39;Sonde Parker&#39;,
+        speed: 532000,
+        kilometerPrice: 50000,
+      },
+    ];
+
+    const starships: Starship[] = Object.assign(new Array&lt;Starship&gt;(), starshipsJSON);
+
+    return starships;
+  }
+</code></pre>
+<p>De même que pour <code>planet</code>, la route qui liste tous les vaisseaux peut être testée via Swagger ou via son URL : <a href="http://localhost:3000/starship" target="_blank">http://localhost:3000/starship</a>.</p>
 
 
       </google-codelab-step>
