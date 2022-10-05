@@ -532,8 +532,12 @@ Booking" duration="0">
         <p>Dans cette étape nous allons créer une nouvelle ressource : <code>booking</code> :</p>
 <pre><code language="language-bash" class="language-bash">nest g resource booking
 </code></pre>
-<p>Modifions l&#39;entité <code>Booking</code> pour qu&#39;elle hérite de <code>DefaultEntity</code> :</p>
-<pre><code language="language-ts" class="language-ts">export class Booking extends DefaultEntity {
+<p>Dans <code>BookingModule</code>, ajoutons l&#39;import des modules nécessaires :</p>
+<pre><code language="language-ts" class="language-ts">imports: [PlanetModule, StarshipModule, TypeOrmModule.forFeature([Booking])],
+</code></pre>
+<p>Modifions l&#39;entité <code>Booking</code> pour qu&#39;elle hérite de <code>DefaultEntity</code> et déclarons la comme une entité avec mapping vers la table booking :</p>
+<pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;booking&#39; })
+export class Booking extends DefaultEntity {
 </code></pre>
 <p>Et ajoutons le mapping pour les propriétés suivantes.</p>
 <pre><code language="language-ts" class="language-ts">@ManyToOne(() =&gt; Planet)
@@ -549,26 +553,27 @@ traveller: string;
 departureDate: Date;
 
 arrivalDate: Date;
-</code></pre>
-<p>Le décorateur <code>@ManyToOne</code> permet de créer un lien entre l&#39;entité <code>Booking</code> et les entités <code>Planet</code> et <code>Starship</code>. Notons que la propriété <code>arrivalDate</code> ne correspond pas à une colonne mais sera calculée (voir plus bas).</p>
-<p>Ajoutons également les propriétés <code>travelTime</code> et <code>price</code>. Ces propriétés sont calculées après le chargement d&#39;une entité <code>Booking</code>.</p>
-<pre><code>@AfterLoad()
-travelTime() {
-    if (this.destination?.distanceToEarth &amp;&amp; this.starship?.kilometerPrice &amp;&amp; this.starship?.speed) {
-        const travelTime = this.destination.distanceToEarth / (this.starship.speed * 24);
-        this.arrivalDate = new Date(dayjs(this.departureDate).add(travelTime, &#39;day&#39;).toISOString());
-        return travelTime;
-    }
-}
 
-@AfterLoad()
-price() {
-    if (this.destination?.distanceToEarth &amp;&amp; this.starship?.kilometerPrice) {
-        return this.destination.distanceToEarth * this.starship.kilometerPrice;
-    }
-}
+price: number;
 </code></pre>
-<p>Créer une nouvelle classe <code>CreateBookingDto</code> avec les propriétés suivantes. Elle sera utilisée pour décrire l&#39;entrée nécessaire au service de création d&#39;une réservation.</p>
+<p>Le décorateur <code>@ManyToOne</code> permet de créer un lien entre l&#39;entité <code>Booking</code> et les entités <code>Planet</code> et <code>Starship</code>. Notons que les propriétés <code>arrivalDate</code> et <code>price</code> ne correspondent pas à une colonne mais seront calculées (voir plus bas).</p>
+<p>Ajoutons également les méthodes <code>processTravelTime()</code> et <code>processPrice()</code>. Elles sont appelées après le chargement d&#39;une entité <code>Booking</code> et permettent d&#39;alimenter les propriétés <code>arrivalDate</code> et <code>price</code>.</p>
+<pre><code language="language-ts" class="language-ts">  @AfterLoad()
+  processTravelTime() {
+    if (this.destination?.distanceToEarth &amp;&amp; this.starship?.speed) {
+      const travelTime = this.destination.distanceToEarth / (this.starship.speed * 24);
+      this.arrivalDate = new Date(dayjs(this.departureDate).add(travelTime, &#39;day&#39;).toISOString());
+    }
+  }
+
+  @AfterLoad()
+  processPrice() {
+    if (this.destination?.distanceToEarth &amp;&amp; this.starship?.kilometerPrice) {
+      this.price = this.destination.distanceToEarth * this.starship.kilometerPrice;
+    }
+  }
+</code></pre>
+<p>Modifions la classe <code>CreateBookingDto</code> en rajoutant les propriétés suivantes. Elle sera utilisée pour décrire l&#39;entrée nécessaire au service de création d&#39;une réservation.</p>
 <pre><code language="language-ts" class="language-ts">@ApiProperty()
 @Expose()
 @IsBoolean()
@@ -594,7 +599,7 @@ traveller: string;
 @IsDate()
 departureDate: Date;
 </code></pre>
-<p>Créer également une classe <code>UpdateBookingDto</code> qui définira l&#39;entrée nécessaire pour modifier une réservation. L&#39;utilisation de <code>PartialType</code>, importé de <code>@nestjs/swagger</code> permet d&#39;indiquer qu&#39;on a les mêmes propriétés que <code>CreateBookingDto</code> mais qu&#39;elles sont optionnelles.</p>
+<p>Modifions également la classe <code>UpdateBookingDto</code> qui définira l&#39;entrée nécessaire pour modifier une réservation. L&#39;utilisation de <code>PartialType</code>, importé de <code>@nestjs/swagger</code> permet d&#39;indiquer qu&#39;on a les mêmes propriétés que <code>CreateBookingDto</code> mais qu&#39;elles sont optionnelles.</p>
 <pre><code language="language-ts" class="language-ts">export class UpdateBookingDto extends PartialType(CreateBookingDto) {
     @ApiProperty()
     @Expose()
@@ -604,14 +609,14 @@ departureDate: Date;
     uuid: string;
 }
 </code></pre>
-<p>Enrichir le service <code>BookingService</code>. Injections d&#39;abord les dépendances nécessaires dans le constructeur.</p>
+<p>Enrichir le service <code>BookingService</code>. Injectons d&#39;abord les dépendances nécessaires dans le constructeur.</p>
 <pre><code language="language-ts" class="language-ts">constructor(
     @InjectRepository(Booking) private readonly bookingRepository: Repository&lt;Booking&gt;,
     private readonly planetService: PlanetService,
     private readonly starshipService: StarshipService,
 ) { }
 </code></pre>
-<p>Compléter la méthode de création d&#39;une réservation. Elle crée une instance de l&#39;entité <code>Booking</code>, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l&#39;entité. On fait également aux services <code>planetService</code> et <code>starshipService</code> pour récupérer les entités correspondant aux uuids fournis dans le DTO.</p>
+<p>Modifions la méthode de création d&#39;une réservation. Elle crée une instance de l&#39;entité <code>Booking</code>, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l&#39;entité. On fait également aux services <code>planetService</code> et <code>starshipService</code> pour récupérer les entités correspondant aux uuids fournis dans le DTO.</p>
 <pre><code language="language-ts" class="language-ts">async create(createBookingDto: CreateBookingDto): Promise&lt;Booking&gt; {
     const destination = await this.planetService.findOneByUuid(createBookingDto.destinationUuid);
     const starship = await this.starshipService.findOneByUuid(createBookingDto.starshipUuid);
@@ -630,7 +635,12 @@ departureDate: Date;
     return this.bookingRepository.save(booking);
 }
 </code></pre>
-<p>Faire de même pour la méthode <code>update</code>.</p>
+<p>Modifions la méthode <code>findOne()</code> pour prendre en compte un UUID. La propriété <code>relations</code> permet de charger le vaisseau et la planète de destination quand on charge une réservation.</p>
+<pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Booking&gt; {
+    return this.bookingRepository.findOne({ where: { uuid }, relations: [&#39;starship&#39;, &#39;destination&#39;] });
+  }
+</code></pre>
+<p>De même que pour <code>create()</code>, la méthode <code>update</code> est modifiée :</p>
 <pre><code language="language-ts" class="language-ts">async update(uuid: string, updateBookingDto: UpdateBookingDto): Promise&lt;Booking&gt; {
     const booking = await this.findOneByUuid(uuid);
 
@@ -661,21 +671,16 @@ departureDate: Date;
     return this.bookingRepository.save(booking);
 }
 </code></pre>
-<p>Compléter les méthodes <code>remove</code> et <code>findAll</code>, et ajouter une méthode <code>findOneByUuid</code>. La propriété <code>relations</code> permet de charger le vaisseau et la planète de destination quand on charge une réservation.</p>
+<p>Compléter les méthodes <code>remove</code> et <code>findAll</code> :</p>
 <pre><code language="language-ts" class="language-ts">remove(uuid: string): Promise&lt;DeleteResult&gt; {
     return this.bookingRepository.delete({ uuid });
 }
-
-findAll(): Promise&lt;Booking[]&gt; {
+</code></pre>
+<pre><code language="language-ts" class="language-ts">findAll(): Promise&lt;Booking[]&gt; {
     return this.bookingRepository.find({ relations: [&#39;starship&#39;, &#39;destination&#39;] });
 }
 </code></pre>
-<p>Et ajouter la méthode <code>findOneByUuid</code> :</p>
-<pre><code language="language-ts" class="language-ts">findOneByUuid(uuid: string): Promise&lt;Booking&gt; {
-    return this.bookingRepository.findOne({ where: { uuid }, relations: [&#39;starship&#39;, &#39;destination&#39;] });
-}
-</code></pre>
-<p>Et enfin compléter le contrôleur <code>BookingController</code></p>
+<p>Et enfin compléter le contrôleur <code>BookingController</code> :</p>
 <pre><code language="language-ts" class="language-ts">@Post()
 create(@Body() createBookingDto: CreateBookingDto): Promise&lt;Booking&gt; {
     return this.bookingService.create(createBookingDto);
@@ -704,6 +709,10 @@ findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Bo
     return this.bookingService.findOneByUuid(uuid);
 }
 </code></pre>
+<pre><code language="language-ts" class="language-ts">@ApiTags(&#39;bookings&#39;)
+@Controller({ path: &#39;/bookings&#39;, version: &#39;1&#39; })
+</code></pre>
+<p>Il est maintenant possible de manipuler les bookings avec leur API dans Swagger.</p>
 
 
       </google-codelab-step>

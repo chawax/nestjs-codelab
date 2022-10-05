@@ -660,9 +660,15 @@ Dans cette étape nous allons créer une nouvelle ressource : `booking` :
 nest g resource booking
 ```
 
-Modifions l'entité `Booking` pour qu'elle hérite de `DefaultEntity` :
+Dans `BookingModule`, ajoutons l'import des modules nécessaires :
+```ts
+imports: [PlanetModule, StarshipModule, TypeOrmModule.forFeature([Booking])],
+```
+
+Modifions l'entité `Booking` pour qu'elle hérite de `DefaultEntity` et déclarons la comme une entité avec mapping vers la table booking :
 
 ```ts
+@Entity({ name: 'booking' })
 export class Booking extends DefaultEntity {
 ```
 
@@ -682,31 +688,32 @@ traveller: string;
 departureDate: Date;
 
 arrivalDate: Date;
+
+price: number;
 ```
 
-Le décorateur `@ManyToOne` permet de créer un lien entre l'entité `Booking` et les entités `Planet` et `Starship`. Notons que la propriété `arrivalDate` ne correspond pas à une colonne mais sera calculée (voir plus bas).
+Le décorateur `@ManyToOne` permet de créer un lien entre l'entité `Booking` et les entités `Planet` et `Starship`. Notons que les propriétés `arrivalDate` et `price` ne correspondent pas à une colonne mais seront calculées (voir plus bas).
 
-Ajoutons également les propriétés `travelTime` et `price`. Ces propriétés sont calculées après le chargement d'une entité `Booking`.
+Ajoutons également les méthodes `processTravelTime()` et `processPrice()`. Elles sont appelées après le chargement d'une entité `Booking` et permettent d'alimenter les propriétés `arrivalDate` et `price`.
 
-```
-@AfterLoad()
-travelTime() {
-    if (this.destination?.distanceToEarth && this.starship?.kilometerPrice && this.starship?.speed) {
-        const travelTime = this.destination.distanceToEarth / (this.starship.speed * 24);
-        this.arrivalDate = new Date(dayjs(this.departureDate).add(travelTime, 'day').toISOString());
-        return travelTime;
+```ts
+  @AfterLoad()
+  processTravelTime() {
+    if (this.destination?.distanceToEarth && this.starship?.speed) {
+      const travelTime = this.destination.distanceToEarth / (this.starship.speed * 24);
+      this.arrivalDate = new Date(dayjs(this.departureDate).add(travelTime, 'day').toISOString());
     }
-}
+  }
 
-@AfterLoad()
-price() {
+  @AfterLoad()
+  processPrice() {
     if (this.destination?.distanceToEarth && this.starship?.kilometerPrice) {
-        return this.destination.distanceToEarth * this.starship.kilometerPrice;
+      this.price = this.destination.distanceToEarth * this.starship.kilometerPrice;
     }
-}
+  }
 ```
 
-Créer une nouvelle classe `CreateBookingDto` avec les propriétés suivantes. Elle sera utilisée pour décrire l'entrée nécessaire au service de création d'une réservation.
+Modifions la classe `CreateBookingDto` en rajoutant les propriétés suivantes. Elle sera utilisée pour décrire l'entrée nécessaire au service de création d'une réservation.
 
 ```ts
 @ApiProperty()
@@ -735,7 +742,7 @@ traveller: string;
 departureDate: Date;
 ```
 
-Créer également une classe `UpdateBookingDto` qui définira l'entrée nécessaire pour modifier une réservation. L'utilisation de `PartialType`, importé de `@nestjs/swagger` permet d'indiquer qu'on a les mêmes propriétés que `CreateBookingDto` mais qu'elles sont optionnelles.
+Modifions également la classe `UpdateBookingDto` qui définira l'entrée nécessaire pour modifier une réservation. L'utilisation de `PartialType`, importé de `@nestjs/swagger` permet d'indiquer qu'on a les mêmes propriétés que `CreateBookingDto` mais qu'elles sont optionnelles.
 
 ```ts
 export class UpdateBookingDto extends PartialType(CreateBookingDto) {
@@ -748,7 +755,7 @@ export class UpdateBookingDto extends PartialType(CreateBookingDto) {
 }
 ```
 
-Enrichir le service `BookingService`. Injections d'abord les dépendances nécessaires dans le constructeur.
+Enrichir le service `BookingService`. Injectons d'abord les dépendances nécessaires dans le constructeur.
 
 ```ts
 constructor(
@@ -758,7 +765,7 @@ constructor(
 ) { }
 ```
 
-Compléter la méthode de création d'une réservation. Elle crée une instance de l'entité `Booking`, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l'entité. On fait également aux services `planetService` et `starshipService` pour récupérer les entités correspondant aux uuids fournis dans le DTO.
+Modifions la méthode de création d'une réservation. Elle crée une instance de l'entité `Booking`, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l'entité. On fait également aux services `planetService` et `starshipService` pour récupérer les entités correspondant aux uuids fournis dans le DTO.
 
 
 ```ts
@@ -781,7 +788,14 @@ async create(createBookingDto: CreateBookingDto): Promise<Booking> {
 }
 ```
 
-Faire de même pour la méthode `update`. 
+Modifions la méthode `findOne()` pour prendre en compte un UUID. La propriété `relations` permet de charger le vaisseau et la planète de destination quand on charge une réservation.
+```ts
+  findOneByUuid(uuid: string): Promise<Booking> {
+    return this.bookingRepository.findOne({ where: { uuid }, relations: ['starship', 'destination'] });
+  }
+```
+
+De même que pour `create()`, la méthode `update` est modifiée :
 
 ```ts
 async update(uuid: string, updateBookingDto: UpdateBookingDto): Promise<Booking> {
@@ -815,27 +829,21 @@ async update(uuid: string, updateBookingDto: UpdateBookingDto): Promise<Booking>
 }
 ```
 
-Compléter les méthodes `remove` et `findAll`, et ajouter une méthode `findOneByUuid`. La propriété `relations` permet de charger le vaisseau et la planète de destination quand on charge une réservation.
+Compléter les méthodes `remove` et `findAll` :
 
 ```ts
 remove(uuid: string): Promise<DeleteResult> {
     return this.bookingRepository.delete({ uuid });
 }
+```
 
+```ts
 findAll(): Promise<Booking[]> {
     return this.bookingRepository.find({ relations: ['starship', 'destination'] });
 }
 ```
 
-Et ajouter la méthode `findOneByUuid` :
-
-```ts
-findOneByUuid(uuid: string): Promise<Booking> {
-    return this.bookingRepository.findOne({ where: { uuid }, relations: ['starship', 'destination'] });
-}
-```
-
-Et enfin compléter le contrôleur `BookingController`
+Et enfin compléter le contrôleur `BookingController` :
 
 ```ts
 @Post()
@@ -866,6 +874,13 @@ findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Booking> {
     return this.bookingService.findOneByUuid(uuid);
 }
 ```
+
+```ts
+@ApiTags('bookings')
+@Controller({ path: '/bookings', version: '1' })
+```
+
+Il est maintenant possible de manipuler les bookings avec leur API dans Swagger.
 
 ## Sécurisation des contrôleurs
 Duration: 10:00
