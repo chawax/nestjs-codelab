@@ -40,3 +40,5 @@ lerna-debug.log*
 # Google Codelabs Tools
 
 codelab/nestjs
+
+*.code-workspace

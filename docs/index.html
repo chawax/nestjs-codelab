@@ -27,21 +27,764 @@
                   environment="web"
                   feedback-link="">
     
-      <google-codelab-step label="Step 1" duration="6">
-        <p>Contenu standard</p>
-<pre><code language="language-ts" class="language-ts">const name : string = &#39;olivier&#39;;
+      <google-codelab-step label="Récupération du projet et installation des outils" duration="5">
+        <p>Prérequis :</p>
+<ul>
+<li><a href="https://git-scm.com/" target="_blank">Git</a></li>
+<li><a href="https://nodejs.org/" target="_blank">Node / npm</a></li>
+<li><a href="https://code.visualstudio.com/" target="_blank">Visual Studio Code</a> (ou tout autre IDE JS)</li>
+</ul>
+<p>Installer <a href="https://docs.nestjs.com/cli/overview" target="_blank">Nest CLI</a> :</p>
+<pre><code language="language-bash" class="language-bash">npm install -g @nestjs/cli
+</code></pre>
+<p>Vérifier le bon fonctionnement :</p>
+<pre><code language="language-bash" class="language-bash">nest -v
+</code></pre>
+<p>Récupérer le code du projet :</p>
+<pre><code language="language-bash" class="language-bash">git clone https://github.com/chawax/nestjs-codelab.git
+</code></pre>
+<p>Installer les dépendances npm :</p>
+<pre><code language="language-bash" class="language-bash">cd nestjs-codelab
+npm i
 </code></pre>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 2" duration="10">
-        
+      <google-codelab-step label="Première API" duration="10">
+        <p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
+<p>La première route de notre API consiste à donner l&#39;état de santé de notre application.</p>
+<p>Créons le module <code>health</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g module health
+</code></pre>
+<p>Créons le controller <code>health</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g controller health
+</code></pre>
+<p>Dans le fichier <code>src\health\health.controller.ts</code> du controller, rajoutons la méthode <code>check</code> qui répondra aux requêtes de type <code>GET</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Get()
+check(): string {
+    return &#39;Everything is OK&#39;;
+}
+</code></pre>
+<p>L&#39;IDE nous aide à rajouter les imports de librairies nécessaires.</p>
+<p>Vérifions que tout fonctionne :</p>
+<pre><code language="language-bash" class="language-bash">npm run start:dev
+</code></pre>
+<p>La route <code>health</code> est accessible dans un navigateur via <a href="http://localhost:3000/health" target="_blank">http://localhost:3000/health</a>.</p>
+<p>Nous allons maitenant activer le versionning d&#39;API et la documentation Swagger.</p>
+<p>Dans <code>src\main.ts</code>, rajoutons la configuration nécessaire :</p>
+<pre><code language="language-ts" class="language-ts">  // VERSIONNING
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
+
+  //-------- SWAGGER
+  const config = new DocumentBuilder()
+    .setTitle(&#39;Form Earth to Moon API&#39;)
+    .setDescription(&#39;A codelab to discover NestJs and more&#39;)
+    .setVersion(&#39;1.0&#39;)
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(&#39;api&#39;, app, document);
+</code></pre>
+<p>Modifions <code>HealthController</code> pour rajouter un numéro de version sur son API :</p>
+<pre><code language="language-ts" class="language-ts">@Controller({ path: &#39;/health&#39;, version: &#39;1&#39; })
+</code></pre>
+<p>L&#39;URL de la route <code>health</code> est maintenant <a href="http://localhost:3000/v1/health" target="_blank">http://localhost:3000/v1/health</a>.</p>
+<p>L&#39;interface Swagger est accessible via <a href="http://localhost:3000/api" target="_blank">http://localhost:3000/api</a>. Nous pouvons y tester notre API.</p>
+
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 3" duration="20">
-        
+      <google-codelab-step label="Ressources Planet et Starship" duration="10">
+        <p>Nous allons maintenant créer une API pour la gestion de planètes. Pour ce faire, nous allons créer des classes <a href="https://docs.nestjs.com/controllers" target="_blank">controller</a>, <a href="https://docs.nestjs.com/providers#services" target="_blank">service</a>, DTO et entity et placer le tout dans un module dédié.</p>
+<p>Tout cela peut être préparé avec la commande suivante :</p>
+<pre><code language="language-bash" class="language-bash">nest g resource planet
+</code></pre>
+<p>Choisissons <code>REST API</code> dans la liste proposée de couches de transport. Nous activons également la génération des points d&#39;entrée CRUD.</p>
+<p>Dans la classe entity <code>src\planet\entities\planet.entity.ts</code>, ajoutons les propriétés d&#39;une planète :</p>
+<pre><code language="language-ts" class="language-ts">name: string;
+
+distanceToEarth: number;
+</code></pre>
+<p>Dans la class service <code>src\planet\planet.service.ts</code>, modifions la méthode <code>findAll()</code> pour renvoyer des données en dur :</p>
+<pre><code language="language-ts" class="language-ts">findAll(): Planet[] {
+    const planetsJSON = [
+      {
+        name: &#39;Lune&#39;,
+        distanceToEarth: 384400,
+      },
+      {
+        name: &#39;Venus&#39;,
+        distanceToEarth: 41400000,
+      },
+      {
+        name: &#39;Mars&#39;,
+        distanceToEarth: 78340000,
+      },
+      {
+        name: &#39;Mercure&#39;,
+        distanceToEarth: 91690000,
+      },
+      {
+        name: &#39;Jupiter&#39;,
+        distanceToEarth: 628730000,
+      },
+      {
+        name: &#39;Saturne&#39;,
+        distanceToEarth: 1275000000,
+      },
+      {
+        name: &#39;Uranus&#39;,
+        distanceToEarth: 2723950000,
+      },
+      {
+        name: &#39;Neptune&#39;,
+        distanceToEarth: 4351400000,
+      },
+    ];
+
+    const planets: Planet[] = Object.assign(new Array&lt;Planet&gt;(), planetsJSON);
+
+    return planets;
+  }
+</code></pre>
+<p>Nous pouvons tester la route qui liste toutes les planètes via Swagger ou via son URL : <a href="http://localhost:3000/planet" target="_blank">http://localhost:3000/planet</a>.</p>
+<p>Faisons maintenant de même pour la ressource <code>starship</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g resource starship
+</code></pre>
+<p>Ajoutons les proprietés d&#39;un <code>starship</code> :</p>
+<pre><code language="language-ts" class="language-ts">name: string;
+
+speed: number;
+
+kilometerPrice: number;
+</code></pre>
+<p>Modifions la méthode <code>findAll()</code> de l&#39;entité <code>starship</code> pour renvoyer des données en dur :</p>
+<pre><code language="language-ts" class="language-ts">findAll(): Starship[] {
+    const starshipsJSON = [
+      {
+        name: &#39;Apollo&#39;,
+        speed: 39000,
+        kilometerPrice: 10000,
+      },
+      {
+        name: &#39;SpaceX Starship&#39;,
+        speed: 27000,
+        kilometerPrice: 250000,
+      },
+      {
+        name: &#39;Sonde Parker&#39;,
+        speed: 532000,
+        kilometerPrice: 50000,
+      },
+    ];
+
+    const starships: Starship[] = Object.assign(new Array&lt;Starship&gt;(), starshipsJSON);
+
+    return starships;
+  }
+</code></pre>
+<p>De même que pour <code>planet</code>, la route qui liste tous les vaisseaux peut être testée via Swagger ou via son URL : <a href="http://localhost:3000/starship" target="_blank">http://localhost:3000/starship</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="TypeORM" duration="10">
+        <p>Nous allons maintenant activer l&#39;ORM <a href="https://typeorm.io/" target="_blank">TypeORM</a> pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>.</p>
+<p>Sur les classes entity, nous rajoutons l&#39;annotation <code>@Entity()</code> pour indiquer à TypeORM de faire le mapping avec une table de la base de données.</p>
+<p>Pour <code>planet</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;planet&#39; })
+</code></pre>
+<p>Pour <code>starship</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;starship&#39; })
+</code></pre>
+<p>Puis sur chaque propriété de ces 2 classes, nous rajoutons l&#39;annotation <code>@Column()</code> pour faire le mapping avec les colonnes des tables concernées. Ex :</p>
+<pre><code language="language-ts" class="language-ts">@Column()
+name: string;
+</code></pre>
+<p>Créons ensuite, dans <code>src\utils\default-entity.ts</code>, la classe <code>DefaultEntity</code> qui contient les propriétés communes à toutes les entités de notre application, à savoir :</p>
+<ul>
+<li><code>id</code> : un identifiant technique généré automatiquement par incrément</li>
+<li><code>uuid</code> : un identifiant métier unique au format UUID et généré automatiquement</li>
+<li><code>active</code> : un booléen indiquant si la ressource est active</li>
+</ul>
+<p>Le code de la classe <code>DefaultEntity</code> est le suivant :</p>
+<pre><code language="language-ts" class="language-ts">import { Exclude } from &#34;class-transformer&#34;;
+import { Column, Generated, PrimaryGeneratedColumn } from &#34;typeorm&#34;;
+
+export class DefaultEntity {
+    @Exclude()
+    @PrimaryGeneratedColumn(&#39;identity&#39;)
+    id: number;
+    
+    @Column()
+    active: boolean;
+
+    @Column({ unique: true })
+    @Generated(&#34;uuid&#34;)
+    uuid: string;    
+}
+</code></pre>
+<p>Enfin, faisons hériter <code>Planet</code> et <code>Starship</code> de <code>DefaultEntity</code> :</p>
+<pre><code language="language-ts" class="language-ts">export class Planet extends DefaultEntity {
+</code></pre>
+<pre><code language="language-ts" class="language-ts">export class Starship extends DefaultEntity {
+</code></pre>
+<p>Maintenant, créons un fichier .env à la racine du projet et ajoutons y la référence à la base de données à laquelle nous souhaitons accéder :</p>
+<pre><code>SQL_MEMORY_DB_SHARED=./db/planet-starship.sqlite
+</code></pre>
+<p>Dans <code>src\app.module.ts</code>, dans la section <code>imports</code>, ajoutons le chargement du module TypeORM et de la base de données indiquée dans le fichier de configuration :</p>
+<pre><code language="language-ts" class="language-ts">  imports: [
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) =&gt; {
+        return {
+          type: &#39;sqlite&#39;,
+          database: configService.get(&#39;SQL_MEMORY_DB_SHARED&#39;),
+          entities: [__dirname + &#39;/**/*.entity{.ts,.js}&#39;],
+          synchronize: true,
+        } as TypeOrmModuleOptions;
+      },
+    }),
+    PlanetModule,
+    StarshipModule,
+    BookingModule,
+  ],
+</code></pre>
+<p>Dans <code>src\planet\planet.module.ts</code>, ajoutons l&#39;import de TypeORM pour l&#39;entité <code>Planet</code> et l&#39;export du service <code>PlanetService</code> :</p>
+<pre><code language="language-ts" class="language-ts">  imports: [TypeOrmModule.forFeature([Planet])],
+  exports: [PlanetService],
+</code></pre>
+<p>Faisons de même pour le module starship dans <code>src\starship\starship.module.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">  imports: [TypeOrmModule.forFeature([Starship])],
+  exports: [StarshipService],
+</code></pre>
+<p>Dans le service <code>PlanetService</code>, ajoutons un constructeur qui injecte le repository <code>Planet</code> :</p>
+<pre><code language="language-ts" class="language-ts">  constructor(
+    @InjectRepository(Planet)
+    private readonly planetRepository: Repository&lt;Planet&gt;,
+  ) {}
+</code></pre>
+<p>Puis modifions la méthode <code>findAll()</code> pour utiliser le repository qui va exécuter la requête de récupération des objets <code>Planet</code> sur la base de données. La signature de la méthode est modifiée pour renvoyer un objet <code>Promise<Planet[]></code> :</p>
+<pre><code language="language-ts" class="language-ts">  findAll(): Promise&lt;Planet[]&gt; {
+    return this.planetRepository.find();
+  }
+</code></pre>
+<p>Faisons de même pour le service <code>StarshipService</code> :</p>
+<pre><code language="language-ts" class="language-ts">  constructor(
+    @InjectRepository(Starship)
+    private readonly starshipRepository: Repository&lt;Starship&gt;,
+  ) {}
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  findAll(): Promise&lt;Starship[]&gt; {
+    return this.starshipRepository.find();
+  }
+</code></pre>
+<p>Les données <code>planet</code> et <code>starship</code> sont mainteanant récupérées depuis la base de données. On peut le tester avec <a href="http://localhost:3000/planet" target="_blank">http://localhost:3000/planet</a> et <a href="http://localhost:3000/starship" target="_blank">http://localhost:3000/starship</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="CRUD Planet et Starship" duration="20">
+        <p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écrtirure en base de données.</p>
+<p>Modifions <code>src\planet\dto\create-planet.dto.ts</code> pour rajouter les propriétés utiles à la création d&#39;une planète. On y ajoute des annotations utiles à l&#39;exposition Swagger et à la validation des données :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  distanceToEarth: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+</code></pre>
+<p><code>UpdatePlanetDto</code> hérite partiellement de <code>CreatePlanetDto</code> en rajoutant les propriétés nécessaires à la mise à jour :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  distanceToEarth: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+</code></pre>
+<p>Procédons de même pour <code>CreateStarshipDto</code>  :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  speed: number;
+  
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  kilometerPrice: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+</code></pre>
+<p>Et pour <code>UpdateStarshipDto</code> :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsNotEmpty()
+  @IsUUID()
+  @IsOptional()
+  uuid: string;
+</code></pre>
+<p>Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans <code>src\main.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">  //------- IN &amp; OUT
+  // Enables global behaviors on incoming DTO
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Only expose attributes wille be accepted on incoming DTO
+      transform: true, // Automatically converts attributes from incoming DTO when possible
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // Enables global behaviors on outgoing entities
+  // For examples, @Exclude decorators will be processed
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+</code></pre>
+<p>Modifions <code>PlanetService</code> pour utiliser les DTO et le repository.</p>
+<p>Commençons par la méthode <code>create()</code>. Le type de retour est modifié pour correspondre au type de retour de la méthode <code>save()</code> du repository :</p>
+<pre><code language="language-ts" class="language-ts">  create(createPlanetDto: CreatePlanetDto): Promise&lt;Planet&gt; {
+    return this.planetRepository.save(createPlanetDto);
+  }
+</code></pre>
+<p>Remplaçons la méthode <code>findOne()</code> pour une méthode <code>findOneByUuid()</code> qui recherche une planète en fonction de son UUID :</p>
+<pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Planet | null&gt; {
+    return this.planetRepository.findOneBy({ uuid });
+  }
+</code></pre>
+<p>La méthode <code>update()</code> est modifiée pour prendre en entrée un UUID plutôt qu&#39;un id. Elle renvoie un objet de type <code>Promise<Planet></code> :</p>
+<pre><code language="language-ts" class="language-ts">  async update(uuid: string, updatePlanetDto: UpdatePlanetDto): Promise&lt;Planet&gt; {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    await this.planetRepository.save({ id: planet.id, ...updatePlanetDto });
+
+    return this.findOneByUuid(uuid);
+  }
+</code></pre>
+<p>Idem pour la méthode <code>remove()</code> :</p>
+<pre><code language="language-ts" class="language-ts">  async remove(uuid: string): Promise&lt;DeleteResult&gt; {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    return this.planetRepository.delete({ uuid });
+  }
+</code></pre>
+<p>La classe <code>PlanetController</code> doit être modifiée pour prendre en compte nos modifications sur <code>PlanetService</code> et pour utiliser des UUID :</p>
+<pre><code language="language-ts" class="language-ts">  @Get(&#39;:uuid&#39;)
+  async findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Planet&gt; {
+    const planet = await this.planetService.findOneByUuid(uuid);
+
+    if (planet) {
+      return planet;
+    }
+
+    throw new NotFoundException();
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Patch(&#39;:uuid&#39;)
+  update(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string, @Body() updatePlanetDto: UpdatePlanetDto): Promise&lt;Planet&gt; {
+    return this.planetService.update(uuid, updatePlanetDto);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Delete(&#39;:uuid&#39;)
+  remove(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;DeleteResult&gt; {
+    return this.planetService.remove(uuid);
+  }
+</code></pre>
+<p>Enfin modifions les annotations de la classe pour versionner l&#39;API et améiorer la lisibilité dans Swagger :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiTags(&#39;planets&#39;)
+  @Controller({ path: &#39;/planets&#39;, version: &#39;1&#39; })
+  export class PlanetController {
+</code></pre>
+<p>Procédons de même pour <code>StarshipService</code> :</p>
+<pre><code language="language-ts" class="language-ts">  create(createStarshipDto: CreateStarshipDto): Promise&lt;Starship&gt; {
+    return this.starshipRepository.save(createStarshipDto);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Starship | null&gt; {
+    return this.starshipRepository.findOneBy({ uuid });
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  async update(uuid: string, updateStarshipDto: UpdateStarshipDto): Promise&lt;Starship&gt; {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    await this.starshipRepository.save({ id: starship.id, ...updateStarshipDto });
+
+    return this.findOneByUuid(uuid);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  async remove(uuid: string): Promise&lt;DeleteResult&gt; {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    return this.starshipRepository.delete({ uuid });
+  }
+</code></pre>
+<p>Et pour <code>StarshipController</code> :</p>
+<pre><code language="language-ts" class="language-ts">  @Get(&#39;:uuid&#39;)
+  findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Starship&gt; {
+    return this.starshipService.findOneByUuid(uuid);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Patch(&#39;:uuid&#39;)
+  update(
+    @Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string,
+    @Body() updateStarshipDto: UpdateStarshipDto,
+  ): Promise&lt;Starship&gt; {
+    return this.starshipService.update(uuid, updateStarshipDto);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Delete(&#39;:uuid&#39;)
+  remove(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;DeleteResult&gt; {
+    return this.starshipService.remove(uuid);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">@ApiTags(&#39;starships&#39;)
+@Controller({ path: &#39;/starships&#39;, version: &#39;1&#39; })
+export class StarshipController {
+</code></pre>
+<p>Nous pouvons maintenant utiliser toutes les opérations CRUD sur Planet et Starship via Swagger.</p>
+<p>Créons des planètes via la route <code>POST</code> <code>/v1/planets</code> :</p>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Mercure&#34;,
+  &#34;distanceToEarth&#34;: 91690000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Jupiter&#34;,
+  &#34;distanceToEarth&#34;: 628730000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Saturne&#34;,
+  &#34;distanceToEarth&#34;: 1275000000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Uranus&#34;,
+  &#34;distanceToEarth&#34;: 2723950000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Neptune&#34;,
+  &#34;distanceToEarth&#34;: 4351400000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<p>Créons un starship via la route <code>POST</code> <code>/v1/starships</code> :</p>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;SpaceX Starship&#34;,
+  &#34;speed&#34;: 27000,
+  &#34;kilometerPrice&#34;: 250000,
+  &#34;active&#34;: true
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Création de la ressource 
+Booking" duration="15">
+        <p>Dans cette étape nous allons créer une nouvelle ressource : <code>booking</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g resource booking
+</code></pre>
+<p>Dans <code>BookingModule</code>, ajoutons l&#39;import des modules nécessaires :</p>
+<pre><code language="language-ts" class="language-ts">imports: [PlanetModule, StarshipModule, TypeOrmModule.forFeature([Booking])],
+</code></pre>
+<p>Modifions l&#39;entité <code>Booking</code> pour qu&#39;elle hérite de <code>DefaultEntity</code> et déclarons la comme une entité avec mapping vers la table <code>booking</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;booking&#39; })
+export class Booking extends DefaultEntity {
+</code></pre>
+<p>Et ajoutons le mapping pour les propriétés suivantes :</p>
+<pre><code language="language-ts" class="language-ts">@ManyToOne(() =&gt; Planet)
+destination: Planet;
+
+@ManyToOne(() =&gt; Starship)
+starship: Starship;
+
+@Column()
+traveller: string;
+
+@Column()
+departureDate: Date;
+
+arrivalDate: Date;
+
+price: number;
+</code></pre>
+<p>Le décorateur <code>@ManyToOne</code> permet de créer un lien entre l&#39;entité <code>Booking</code> et les entités <code>Planet</code> et <code>Starship</code>. Notons que les propriétés <code>arrivalDate</code> et <code>price</code> ne correspondent pas à des colonnes mais seront calculées (voir plus bas).</p>
+<p>Ajoutons également les méthodes <code>processTravelTime()</code> et <code>processPrice()</code>. Elles sont appelées après le chargement d&#39;une entité <code>Booking</code> et permettent d&#39;alimenter les propriétés <code>arrivalDate</code> et <code>price</code>.</p>
+<pre><code language="language-ts" class="language-ts">  @AfterLoad()
+  processTravelTime() {
+    if (this.destination?.distanceToEarth &amp;&amp; this.starship?.speed) {
+      const travelTime = this.destination.distanceToEarth / (this.starship.speed * 24);
+      this.arrivalDate = new Date(dayjs(this.departureDate).add(travelTime, &#39;day&#39;).toISOString());
+    }
+  }
+
+  @AfterLoad()
+  processPrice() {
+    if (this.destination?.distanceToEarth &amp;&amp; this.starship?.kilometerPrice) {
+      this.price = this.destination.distanceToEarth * this.starship.kilometerPrice;
+    }
+  }
+</code></pre>
+<p>Modifions la classe <code>CreateBookingDto</code> en rajoutant les propriétés ci-après. Elle sera utilisée pour décrire l&#39;entrée nécessaire au service de création d&#39;une réservation.</p>
+<pre><code language="language-ts" class="language-ts">@ApiProperty()
+@Expose()
+@IsBoolean()
+active: boolean;
+
+@ApiProperty()
+@Expose()
+@IsUUID()
+destinationUuid: string;
+
+@ApiProperty()
+@Expose()
+@IsUUID()
+starshipUuid: string;
+
+@ApiProperty()
+@Expose()
+@IsString()
+traveller: string;
+
+@ApiProperty()
+@Expose()
+@IsDate()
+departureDate: Date;
+</code></pre>
+<p>Modifions également la classe <code>UpdateBookingDto</code> qui définira l&#39;entrée nécessaire pour modifier une réservation. L&#39;utilisation de <code>PartialType</code>, importé de <code>@nestjs/swagger</code> permet d&#39;indiquer qu&#39;on a les mêmes propriétés que <code>CreateBookingDto</code> mais qu&#39;elles sont optionnelles.</p>
+<pre><code language="language-ts" class="language-ts">export class UpdateBookingDto extends PartialType(CreateBookingDto) {
+    @ApiProperty()
+    @Expose()
+    @IsNotEmpty()
+    @IsUUID()
+    @IsOptional()
+    uuid: string;
+}
+</code></pre>
+<p>Enrichir le service <code>BookingService</code>. Injectons d&#39;abord les dépendances nécessaires dans le constructeur.</p>
+<pre><code language="language-ts" class="language-ts">constructor(
+    @InjectRepository(Booking) private readonly bookingRepository: Repository&lt;Booking&gt;,
+    private readonly planetService: PlanetService,
+    private readonly starshipService: StarshipService,
+) { }
+</code></pre>
+<p>Modifions la méthode de création d&#39;une réservation. Elle crée une instance de l&#39;entité <code>Booking</code>, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l&#39;entité. On fait également appel aux services <code>planetService</code> et <code>starshipService</code> pour récupérer les entités correspondant aux uuids fournis dans le DTO.</p>
+<pre><code language="language-ts" class="language-ts">async create(createBookingDto: CreateBookingDto): Promise&lt;Booking&gt; {
+    const destination = await this.planetService.findOneByUuid(createBookingDto.destinationUuid);
+    const starship = await this.starshipService.findOneByUuid(createBookingDto.starshipUuid);
+
+    if (!destination || !starship) {
+        throw new UnprocessableEntityException(&#39;Both destination and starship should contains existing uuids&#39;);
+    }
+
+    const booking: Booking = new Booking();
+    booking.active = createBookingDto.active;
+    booking.departureDate = createBookingDto.departureDate;
+    booking.traveller = createBookingDto.traveller;
+    booking.destination = destination;
+    booking.starship = starship;
+
+    return this.bookingRepository.save(booking);
+}
+</code></pre>
+<p>Modifions la méthode <code>findOne()</code> pour prendre en compte un UUID. La propriété <code>relations</code> permet de charger le vaisseau et la planète de destination quand on charge une réservation.</p>
+<pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Booking&gt; {
+    return this.bookingRepository.findOne({ where: { uuid }, relations: [&#39;starship&#39;, &#39;destination&#39;] });
+  }
+</code></pre>
+<p>De même que pour <code>create()</code>, la méthode <code>update</code> est modifiée :</p>
+<pre><code language="language-ts" class="language-ts">async update(uuid: string, updateBookingDto: UpdateBookingDto): Promise&lt;Booking&gt; {
+    const booking = await this.findOneByUuid(uuid);
+
+    if (!booking) {
+      throw new NotFoundException();
+    }
+
+    if (updateBookingDto.destinationUuid) {
+      const destination = await this.planetService.findOneByUuid(updateBookingDto.destinationUuid);
+      if (!destination) {
+        throw new UnprocessableEntityException(&#39;The provided destination UUID doesn\&#39;t map to an existing destination&#39;);
+      }
+      booking.destination = destination;
+    }
+
+    if (updateBookingDto.starshipUuid) {
+      const starship = await this.starshipService.findOneByUuid(updateBookingDto.starshipUuid);
+      if (!starship) {
+        throw new UnprocessableEntityException(&#39;The provided starship UUID doesn\&#39;t map to an existing starship&#39;);
+      }
+      booking.starship = starship;
+    }
+
+    booking.active = updateBookingDto.active;
+    booking.departureDate = updateBookingDto.departureDate;
+    booking.traveller = updateBookingDto.traveller;
+
+    return this.bookingRepository.save(booking);
+}
+</code></pre>
+<p>Compléter les méthodes <code>remove</code> et <code>findAll</code> :</p>
+<pre><code language="language-ts" class="language-ts">remove(uuid: string): Promise&lt;DeleteResult&gt; {
+    return this.bookingRepository.delete({ uuid });
+}
+</code></pre>
+<pre><code language="language-ts" class="language-ts">findAll(): Promise&lt;Booking[]&gt; {
+    return this.bookingRepository.find({ relations: [&#39;starship&#39;, &#39;destination&#39;] });
+}
+</code></pre>
+<p>Et enfin compléter le contrôleur <code>BookingController</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Post()
+create(@Body() createBookingDto: CreateBookingDto): Promise&lt;Booking&gt; {
+    return this.bookingService.create(createBookingDto);
+}
+
+@Patch(&#39;:uuid&#39;)
+update(
+    @Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+): Promise&lt;Booking&gt; {
+    return this.bookingService.update(uuid, updateBookingDto);
+}
+
+@Delete(&#39;:uuid&#39;)
+remove(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;DeleteResult&gt; {
+    return this.bookingService.remove(uuid);
+}
+
+@Get()
+findAll(): Promise&lt;Booking[]&gt; {
+    return this.bookingService.findAll();
+}
+
+@Get(&#39;:uuid&#39;)
+findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Booking&gt; {
+    return this.bookingService.findOneByUuid(uuid);
+}
+</code></pre>
+<pre><code language="language-ts" class="language-ts">@ApiTags(&#39;bookings&#39;)
+@Controller({ path: &#39;/bookings&#39;, version: &#39;1&#39; })
+</code></pre>
+<p>Il est maintenant possible de manipuler les bookings avec leur API dans Swagger.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Sécurisation des contrôleurs" duration="10">
+        <p>Nous allons sécuriser l&#39;accès à nos endoints en exigeant la fourniture d&#39;un bearer d&#39;authentification dans les headers des requêtes. Nous allons créer un &#34;guard&#34;, un composant NestJS qui permet de contrôler l&#39;accès à des routes.</p>
+<p>Dans le fichier <code>.env</code> ajouter la variable d&#39;environnement <code>API_BEARER</code> qui définit la valeur attendue pour le bearer :</p>
+<pre><code>API_BEARER=MyBearer
+</code></pre>
+<p>Créer un nouveau module <code>security</code> :</p>
+<pre><code language="language-bash" class="language-bash">nest g module security
+</code></pre>
+<p>Créer un guard dans ce module :</p>
+<pre><code language="language-bash" class="language-bash">nest g guard security/bearer
+</code></pre>
+<p>Compléter le code du guard comme ci-dessous :</p>
+<pre><code language="language-ts" class="language-ts">import { CanActivate, ExecutionContext, Injectable, Logger } from &#39;@nestjs/common&#39;;
+import { ConfigService } from &#39;@nestjs/config&#39;;
+import { Observable } from &#39;rxjs&#39;;
+
+@Injectable()
+export class BearerGuard implements CanActivate {
+  private readonly logger = new Logger(BearerGuard.name);
+
+  constructor(private configService: ConfigService) {}
+
+  canActivate(context: ExecutionContext): boolean | Promise&lt;boolean&gt; | Observable&lt;boolean&gt; {
+    const request = context.switchToHttp().getRequest();
+
+    if (request?.headers?.authorization === `Bearer ${this.configService.get&lt;string&gt;(&#39;API_BEARER&#39;)}`) {
+      return true;
+    }
+
+    this.logger.warn(`An unauthorized call has been made on a API endpoint`);
+    return false;
+  }
+}
+</code></pre>
+<p>Quelques explications :</p>
+<ul>
+<li>L&#39;interface <code>CanActivate</code> permet d&#39;activer ou non une route en fonction du résultat de la méthode <code>canActivate</code></li>
+<li>On contrôle la présence d&#39;un header <code>authorization</code> avec comme valeur attendue celle saisie dans le fichier <code>.env</code>, récupérée grâce au service <code>ConfigService</code>.</li>
+</ul>
+<p>Activons maintenant ce guard pour l&#39;ensemble des routes de l&#39;application en ajoutant les lignes suivantes dans le fichier <code>main.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">  const configService = app.get&lt;ConfigService&gt;(ConfigService);
+
+  // SECURITY
+  app.useGlobalGuards(new BearerGuard(configService));
+</code></pre>
+<p>Nous devons maintenant configurer Swagger pour activer la saisie du header <code>authorization</code> dans Swagger UI.</p>
+<p>Toujours dans le fichier <code>main.ts</code> modifier la configuration de Swagger en faisant appel à la méthode <code>addBearerAuth</code>.</p>
+<pre><code language="language-ts" class="language-ts">  const config = new DocumentBuilder()
+    .setTitle(&#39;Form Earth to Moon API&#39;)
+    .setDescription(&#39;A codelab to discover NestJs and more&#39;)
+    .setVersion(&#39;1.0&#39;)
+    .addBearerAuth()
+    .build();
+</code></pre>
+<p>Enfin sur chacun des contrôleurs ajouter le décorateur <code>@ApiBearerAuth</code> importé de Swagger. Par exemple dans <code>BookingController</code> :</p>
+<pre><code language="language-ts" class="language-ts">@ApiTags(&#39;bookings&#39;)
+@ApiBearerAuth()
+@Controller({ path: &#39;/bookings&#39;, version: &#39;1&#39; })
+export class BookingController {
+</code></pre>
+<p>Il ne reste plus qu&#39;à lancer Swagger UI. Tester les services sans bearer et se rendre compte qu&#39;on a une erreur 403. Puis cliquer sur le bouton <code>Authenticate</code>, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Step 8 - OTH" duration="10">
+        <p>Gestion de la configuration</p>
+
 
       </google-codelab-step>
     
