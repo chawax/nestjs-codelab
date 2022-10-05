@@ -220,12 +220,136 @@ findAll(): Starship[] {
 
 De même que pour `planet`, la route qui liste tous les vaisseaux peut être testée via Swagger ou via son URL : [http://localhost:3000/starship](http://localhost:3000/starship).
 
-## Step 4 - ODA
+## TypeORM
 Duration: 10:00
 
-Intégration de TypeORM pour les ressources `planet` et `starship`
+Nous allons maintenant activer l'ORM TypeORM pour lire des données dans une base de données [SQLite](https://www.sqlite.org/).
 
-En lecture dans un premier temps
+Sur les classes entity, nous rajoutons l'annotation `@Entity()` pour indiquer à TypeORM de faire le mapping avec une table de la base de données.
+
+Pour `planet` :
+
+```ts
+@Entity({ name: 'planet' })
+```
+
+Pour `starship` :
+
+```ts
+@Entity({ name: 'starship' })
+```
+
+Puis sur chaque propriété de ces 2 classes, nous rajoutons l'annotation `@Column()` pour faire le mapping avec les colonnes des tables concernées. Ex :
+
+```ts
+@Column()
+name: string;
+```
+
+Créeons ensuite, dans `src\utils\default-entity.ts`, la classe `DefaultEntity` qui contient les propriétés communes à toutes les entités de notre application, à savoir :
+- `id` : un identifiant technique généré automatiquement par incrément
+- `uuid` : un identifiant métier unique au format UUID et généré automatiquement
+- `active` : un booléen indiquant si la ressource est active
+
+Le code de la classe `DefaultEntity` est le suivant :
+```ts
+import { Exclude } from "class-transformer";
+import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
+
+export class DefaultEntity {
+    @Exclude()
+    @PrimaryGeneratedColumn('identity')
+    id: number;
+    
+    @Column()
+    active: boolean;
+
+    @Column({ unique: true })
+    @Generated("uuid")
+    uuid: string;    
+}
+```
+
+Enfin, faisons hériter `Planet` et `Starship` de `DefaultEntity` :
+
+```ts
+export class Planet extends DefaultEntity {
+```
+
+```ts
+export class Starship extends DefaultEntity {
+```
+
+Maintenant, créeons un fichier .env à la racine du projet et ajoutons y la référence à la base de données à laquelle nous souhaitons accéder :
+
+```
+SQL_MEMORY_DB_SHARED=./db/planet-starship.sqlite
+```
+
+Dans `src\app.module.ts`, dans la section `imports`, ajoutons le chargement du module TypeORM et de la base de donnée indiquée dans le fichier de configuration :
+```ts
+  imports: [
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          type: 'sqlite',
+          database: configService.get('SQL_MEMORY_DB_SHARED'),
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: true,
+        } as TypeOrmModuleOptions;
+      },
+    }),
+    PlanetModule,
+    StarshipModule,
+    BookingModule,
+  ],
+```
+
+Dans `src\planet\planet.module.ts`, ajoutons l'import de TypeORM pour l'entité `Planet` et l'export du service `PlanetService` :
+```ts
+  imports: [TypeOrmModule.forFeature([Planet])],
+  exports: [PlanetService],
+```
+
+Faisons de même pour le module starship dans `src\starship\starship.module.ts` :
+```ts
+  imports: [TypeOrmModule.forFeature([Starship])],
+  exports: [StarshipService],
+```
+
+Dans le service `PlanetService`, ajoutons un constructeur qui injecte le repository `Planet` :
+```ts
+  constructor(
+    @InjectRepository(Planet)
+    private readonly planetRepository: Repository<Planet>,
+  ) {}
+```
+
+Puis modifions la méthode `findAll()` pour utiliser le repository qui va exécuter la requête de récupération des objet `Planet` sur la base de données. la signature de la méthode est modifiée pour renvoyer un objet `Promise<Planet[]>` :
+```ts
+  findAll(): Promise<Planet[]> {
+    return this.planetRepository.find();
+  }
+```
+
+Faisons de même pour le service `StarshipService` :
+```ts
+  constructor(
+    @InjectRepository(Starship)
+    private readonly starshipRepository: Repository<Starship>,
+  ) {}
+```
+
+```ts
+  findAll(): Promise<Starship[]> {
+    return this.starshipRepository.find();
+  }
+```
+
+Les données `planet` et `starship` sont mainteanant récupérées depuis la base de données. On peut le tester avec [http://localhost:3000/planet](http://localhost:3000/planet) et [http://localhost:3000/starship](http://localhost:3000/starship).
 
 ## Step 5 - ODA
 Duration: 10:00

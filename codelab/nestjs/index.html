@@ -191,9 +191,100 @@ kilometerPrice: number;
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 4 - ODA" duration="10">
-        <p>Intégration de TypeORM pour les ressources <code>planet</code> et <code>starship</code></p>
-<p>En lecture dans un premier temps</p>
+      <google-codelab-step label="TypeORM" duration="10">
+        <p>Nous allons maintenant activer l&#39;ORM TypeORM pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>.</p>
+<p>Sur les classes entity, nous rajoutons l&#39;annotation <code>@Entity()</code> pour indiquer à TypeORM de faire le mapping avec une table de la base de données.</p>
+<p>Pour <code>planet</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;planet&#39; })
+</code></pre>
+<p>Pour <code>starship</code> :</p>
+<pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;starship&#39; })
+</code></pre>
+<p>Puis sur chaque propriété de ces 2 classes, nous rajoutons l&#39;annotation <code>@Column()</code> pour faire le mapping avec les colonnes des tables concernées. Ex :</p>
+<pre><code language="language-ts" class="language-ts">@Column()
+name: string;
+</code></pre>
+<p>Créeons ensuite, dans <code>src\utils\default-entity.ts</code>, la classe <code>DefaultEntity</code> qui contient les propriétés communes à toutes les entités de notre application, à savoir :</p>
+<ul>
+<li><code>id</code> : un identifiant technique généré automatiquement par incrément</li>
+<li><code>uuid</code> : un identifiant métier unique au format UUID et généré automatiquement</li>
+<li><code>active</code> : un booléen indiquant si la ressource est active</li>
+</ul>
+<p>Le code de la classe <code>DefaultEntity</code> est le suivant :</p>
+<pre><code language="language-ts" class="language-ts">import { Exclude } from &#34;class-transformer&#34;;
+import { Column, Generated, PrimaryGeneratedColumn } from &#34;typeorm&#34;;
+
+export class DefaultEntity {
+    @Exclude()
+    @PrimaryGeneratedColumn(&#39;identity&#39;)
+    id: number;
+    
+    @Column()
+    active: boolean;
+
+    @Column({ unique: true })
+    @Generated(&#34;uuid&#34;)
+    uuid: string;    
+}
+</code></pre>
+<p>Enfin, faisons hériter <code>Planet</code> et <code>Starship</code> de <code>DefaultEntity</code> :</p>
+<pre><code language="language-ts" class="language-ts">export class Planet extends DefaultEntity {
+</code></pre>
+<pre><code language="language-ts" class="language-ts">export class Starship extends DefaultEntity {
+</code></pre>
+<p>Maintenant, créeons un fichier .env à la racine du projet et ajoutons y la référence à la base de données à laquelle nous souhaitons accéder :</p>
+<pre><code>SQL_MEMORY_DB_SHARED=./db/planet-starship.sqlite
+</code></pre>
+<p>Dans <code>src\app.module.ts</code>, dans la section <code>imports</code>, ajoutons le chargement du module TypeORM et de la base de donnée indiquée dans le fichier de configuration :</p>
+<pre><code language="language-ts" class="language-ts">  imports: [
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) =&gt; {
+        return {
+          type: &#39;sqlite&#39;,
+          database: configService.get(&#39;SQL_MEMORY_DB_SHARED&#39;),
+          entities: [__dirname + &#39;/**/*.entity{.ts,.js}&#39;],
+          synchronize: true,
+        } as TypeOrmModuleOptions;
+      },
+    }),
+    PlanetModule,
+    StarshipModule,
+    BookingModule,
+  ],
+</code></pre>
+<p>Dans <code>src\planet\planet.module.ts</code>, ajoutons l&#39;import de TypeORM pour l&#39;entité <code>Planet</code> et l&#39;export du service <code>PlanetService</code> :</p>
+<pre><code language="language-ts" class="language-ts">  imports: [TypeOrmModule.forFeature([Planet])],
+  exports: [PlanetService],
+</code></pre>
+<p>Faisons de même pour le module starship dans <code>src\starship\starship.module.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">  imports: [TypeOrmModule.forFeature([Starship])],
+  exports: [StarshipService],
+</code></pre>
+<p>Dans le service <code>PlanetService</code>, ajoutons un constructeur qui injecte le repository <code>Planet</code> :</p>
+<pre><code language="language-ts" class="language-ts">  constructor(
+    @InjectRepository(Planet)
+    private readonly planetRepository: Repository&lt;Planet&gt;,
+  ) {}
+</code></pre>
+<p>Puis modifions la méthode <code>findAll()</code> pour utiliser le repository qui va exécuter la requête de récupération des objet <code>Planet</code> sur la base de données. la signature de la méthode est modifiée pour renvoyer un objet <code>Promise<Planet[]></code> :</p>
+<pre><code language="language-ts" class="language-ts">  findAll(): Promise&lt;Planet[]&gt; {
+    return this.planetRepository.find();
+  }
+</code></pre>
+<p>Faisons de même pour le service <code>StarshipService</code> :</p>
+<pre><code language="language-ts" class="language-ts">  constructor(
+    @InjectRepository(Starship)
+    private readonly starshipRepository: Repository&lt;Starship&gt;,
+  ) {}
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  findAll(): Promise&lt;Starship[]&gt; {
+    return this.starshipRepository.find();
+  }
+</code></pre>
+<p>Les données <code>planet</code> et <code>starship</code> sont mainteanant récupérées depuis la base de données. On peut le tester avec <a href="http://localhost:3000/planet" target="_blank">http://localhost:3000/planet</a> et <a href="http://localhost:3000/starship" target="_blank">http://localhost:3000/starship</a>.</p>
 
 
       </google-codelab-step>
