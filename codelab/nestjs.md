@@ -3,7 +3,7 @@ id:nestjs
 # De la Terre à la Lune (et au-delà) avec NestJS
 
 ## Récupération du projet et installation des outils
-Duration: 5:30
+Duration: 5:00
 
 Prérequis :
 
@@ -56,7 +56,7 @@ Créons le controller `health` :
 nest g controller health
 ```
 
-Dans le fichier `src\health\health.controller.ts` du controller, rajoutons la méthode `check` qui répondra au requête de type `GET` :
+Dans le fichier `src\health\health.controller.ts` du controller, rajoutons la méthode `check` qui répondra aux requêtes de type `GET` :
 
 ```ts
 @Get()
@@ -65,7 +65,7 @@ check(): string {
 }
 ```
 
-L'IDE nous aide à rajouter les import de librairies nécessaires.
+L'IDE nous aide à rajouter les imports de librairies nécessaires.
 
 Vérifions que tout fonctionne :
 
@@ -107,7 +107,7 @@ L'URL de la route `health` est maintenant [http://localhost:3000/v1/health](http
 L'interface Swagger est accessible via [http://localhost:3000/api](http://localhost:3000/api). Nous pouvons y tester notre API.
 
 ## Ressources Planet et Starship
-Duration: 20:00
+Duration: 10:00
 
 Nous allons maintenant créer une API pour la gestion de planètes.
 Pour ce faire, nous allons créer des classes [controller](https://docs.nestjs.com/controllers), [service](https://docs.nestjs.com/providers#services), DTO et entity et placer le tout dans un module dédié.
@@ -223,7 +223,7 @@ De même que pour `planet`, la route qui liste tous les vaisseaux peut être tes
 ## TypeORM
 Duration: 10:00
 
-Nous allons maintenant activer l'ORM TypeORM pour lire des données dans une base de données [SQLite](https://www.sqlite.org/).
+Nous allons maintenant activer l'ORM [TypeORM](https://typeorm.io/) pour lire des données dans une base de données [SQLite](https://www.sqlite.org/).
 
 Sur les classes entity, nous rajoutons l'annotation `@Entity()` pour indiquer à TypeORM de faire le mapping avec une table de la base de données.
 
@@ -246,7 +246,7 @@ Puis sur chaque propriété de ces 2 classes, nous rajoutons l'annotation `@Colu
 name: string;
 ```
 
-Créeons ensuite, dans `src\utils\default-entity.ts`, la classe `DefaultEntity` qui contient les propriétés communes à toutes les entités de notre application, à savoir :
+Créons ensuite, dans `src\utils\default-entity.ts`, la classe `DefaultEntity` qui contient les propriétés communes à toutes les entités de notre application, à savoir :
 - `id` : un identifiant technique généré automatiquement par incrément
 - `uuid` : un identifiant métier unique au format UUID et généré automatiquement
 - `active` : un booléen indiquant si la ressource est active
@@ -280,13 +280,13 @@ export class Planet extends DefaultEntity {
 export class Starship extends DefaultEntity {
 ```
 
-Maintenant, créeons un fichier .env à la racine du projet et ajoutons y la référence à la base de données à laquelle nous souhaitons accéder :
+Maintenant, créons un fichier .env à la racine du projet et ajoutons y la référence à la base de données à laquelle nous souhaitons accéder :
 
 ```
 SQL_MEMORY_DB_SHARED=./db/planet-starship.sqlite
 ```
 
-Dans `src\app.module.ts`, dans la section `imports`, ajoutons le chargement du module TypeORM et de la base de donnée indiquée dans le fichier de configuration :
+Dans `src\app.module.ts`, dans la section `imports`, ajoutons le chargement du module TypeORM et de la base de données indiquée dans le fichier de configuration :
 ```ts
   imports: [
     ConfigModule.forRoot(),
@@ -328,7 +328,7 @@ Dans le service `PlanetService`, ajoutons un constructeur qui injecte le reposit
   ) {}
 ```
 
-Puis modifions la méthode `findAll()` pour utiliser le repository qui va exécuter la requête de récupération des objet `Planet` sur la base de données. la signature de la méthode est modifiée pour renvoyer un objet `Promise<Planet[]>` :
+Puis modifions la méthode `findAll()` pour utiliser le repository qui va exécuter la requête de récupération des objets `Planet` sur la base de données. La signature de la méthode est modifiée pour renvoyer un objet `Promise<Planet[]>` :
 ```ts
   findAll(): Promise<Planet[]> {
     return this.planetRepository.find();
@@ -352,7 +352,7 @@ Faisons de même pour le service `StarshipService` :
 Les données `planet` et `starship` sont mainteanant récupérées depuis la base de données. On peut le tester avec [http://localhost:3000/planet](http://localhost:3000/planet) et [http://localhost:3000/starship](http://localhost:3000/starship).
 
 ## CRUD Planet et Starship
-Duration: 10:00
+Duration: 20:00
 
 Nous allons maintenant rajouter les opérations de récupération unitaire et d'écrtirure en base de données.
 
@@ -462,7 +462,7 @@ Remplaçons la méthode `findOne()` pour une méthode `findOneByUuid()` qui rech
   }
 ```
 
-La méthode `update()` est modifiée pour prendre en entrée un UUID plutôt qu'un id. Elle renvoie un obejt de type `Promise<Planet>` :
+La méthode `update()` est modifiée pour prendre en entrée un UUID plutôt qu'un id. Elle renvoie un objet de type `Promise<Planet>` :
 ```ts
   async update(uuid: string, updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
     const planet = await this.findOneByUuid(uuid);
@@ -597,7 +597,7 @@ Et pour `StarshipController` :
 export class StarshipController {
 ```
 
-Nous pouvons maintenant utiliser toutes les opération CRUD sur Planet et Starship via Swagger.
+Nous pouvons maintenant utiliser toutes les opérations CRUD sur Planet et Starship via Swagger.
 
 Créons des planètes via la route `POST` `/v1/planets` :
 
@@ -653,6 +653,7 @@ Créons un starship via la route `POST` `/v1/starships` :
 ```
 
 ## Création de la ressource `Booking`
+Duration: 15:00
 
 Dans cette étape nous allons créer une nouvelle ressource : `booking` :
 
@@ -665,14 +666,14 @@ Dans `BookingModule`, ajoutons l'import des modules nécessaires :
 imports: [PlanetModule, StarshipModule, TypeOrmModule.forFeature([Booking])],
 ```
 
-Modifions l'entité `Booking` pour qu'elle hérite de `DefaultEntity` et déclarons la comme une entité avec mapping vers la table booking :
+Modifions l'entité `Booking` pour qu'elle hérite de `DefaultEntity` et déclarons la comme une entité avec mapping vers la table `booking` :
 
 ```ts
 @Entity({ name: 'booking' })
 export class Booking extends DefaultEntity {
 ```
 
-Et ajoutons le mapping pour les propriétés suivantes.
+Et ajoutons le mapping pour les propriétés suivantes :
 
 ```ts
 @ManyToOne(() => Planet)
@@ -692,7 +693,7 @@ arrivalDate: Date;
 price: number;
 ```
 
-Le décorateur `@ManyToOne` permet de créer un lien entre l'entité `Booking` et les entités `Planet` et `Starship`. Notons que les propriétés `arrivalDate` et `price` ne correspondent pas à une colonne mais seront calculées (voir plus bas).
+Le décorateur `@ManyToOne` permet de créer un lien entre l'entité `Booking` et les entités `Planet` et `Starship`. Notons que les propriétés `arrivalDate` et `price` ne correspondent pas à des colonnes mais seront calculées (voir plus bas).
 
 Ajoutons également les méthodes `processTravelTime()` et `processPrice()`. Elles sont appelées après le chargement d'une entité `Booking` et permettent d'alimenter les propriétés `arrivalDate` et `price`.
 
@@ -713,7 +714,7 @@ Ajoutons également les méthodes `processTravelTime()` et `processPrice()`. Ell
   }
 ```
 
-Modifions la classe `CreateBookingDto` en rajoutant les propriétés suivantes. Elle sera utilisée pour décrire l'entrée nécessaire au service de création d'une réservation.
+Modifions la classe `CreateBookingDto` en rajoutant les propriétés ci-après. Elle sera utilisée pour décrire l'entrée nécessaire au service de création d'une réservation.
 
 ```ts
 @ApiProperty()
@@ -765,7 +766,7 @@ constructor(
 ) { }
 ```
 
-Modifions la méthode de création d'une réservation. Elle crée une instance de l'entité `Booking`, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l'entité. On fait également aux services `planetService` et `starshipService` pour récupérer les entités correspondant aux uuids fournis dans le DTO.
+Modifions la méthode de création d'une réservation. Elle crée une instance de l'entité `Booking`, la complète avec les données issues du DTO et appelle le repository pour sauvegarder l'entité. On fait également appel aux services `planetService` et `starshipService` pour récupérer les entités correspondant aux uuids fournis dans le DTO.
 
 
 ```ts
@@ -933,7 +934,7 @@ export class BearerGuard implements CanActivate {
 
 Quelques explications :
 - L'interface `CanActivate` permet d'activer ou non une route en fonction du résultat de la méthode `canActivate`
-- On contrôle la présence d'un header `authorization` avec comme valeur attendue celle saisie dans le fichier `.env`, récupérée grâce au service `ConfigService.
+- On contrôle la présence d'un header `authorization` avec comme valeur attendue celle saisie dans le fichier `.env`, récupérée grâce au service `ConfigService`.
 
 Activons maintenant ce guard pour l'ensemble des routes de l'application en ajoutant les lignes suivantes dans le fichier `main.ts` : 
 
