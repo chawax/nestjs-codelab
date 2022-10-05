@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteResult } from 'typeorm';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -7,6 +7,7 @@ import { UpdateBookingDto } from './dto/update-booking.dto';
 import { Booking } from './entities/booking.entity';
 
 @ApiTags('bookings')
+@ApiBearerAuth()
 @Controller({ path: '/bookings', version: '1' })
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}

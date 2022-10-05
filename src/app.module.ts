@@ -5,6 +5,7 @@ import { HealthModule } from './health/health.module';
 import { PlanetModule } from './planet/planet.module';
 import { StarshipModule } from './starship/starship.module';
 import { BookingModule } from './booking/booking.module';
+import { SecurityModule } from './security/security.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -24,6 +25,7 @@ import { BookingModule } from './booking/booking.module';
     PlanetModule,
     StarshipModule,
     BookingModule,
+    SecurityModule,
   ],
   controllers: [],
   providers: [],

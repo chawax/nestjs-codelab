@@ -1,10 +1,17 @@
 import { ClassSerializerInterceptor, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { BearerGuard } from './security/bearer.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService = app.get<ConfigService>(ConfigService);
+
+  // SECURITY
+  app.useGlobalGuards(new BearerGuard(configService));
 
   // VERSIONNING
   app.enableVersioning({
@@ -16,6 +23,7 @@ async function bootstrap() {
     .setTitle('Form Earth to Moon API')
     .setDescription('A codelab to discover NestJs and more')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

@@ -1,7 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
-import { version } from 'process';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller({ path: '/health', version: '1' })
+@ApiBearerAuth()
 export class HealthController {
   @Get()
   check(): string {
