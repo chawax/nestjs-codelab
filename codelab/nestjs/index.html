@@ -573,6 +573,9 @@ price: number;
     }
   }
 </code></pre>
+<p>Attention à l&#39;import de <code>dayjs</code> :</p>
+<pre><code language="language-ts" class="language-ts">import * as dayjs from &#39;dayjs&#39;;
+</code></pre>
 <p>Modifions la classe <code>CreateBookingDto</code> en rajoutant les propriétés ci-après. Elle sera utilisée pour décrire l&#39;entrée nécessaire au service de création d&#39;une réservation.</p>
 <pre><code language="language-ts" class="language-ts">@ApiProperty()
 @Expose()

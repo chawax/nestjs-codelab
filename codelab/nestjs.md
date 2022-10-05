@@ -714,6 +714,12 @@ Ajoutons également les méthodes `processTravelTime()` et `processPrice()`. Ell
   }
 ```
 
+Attention à l'import de `dayjs` : 
+```ts
+import * as dayjs from 'dayjs';
+```
+
+
 Modifions la classe `CreateBookingDto` en rajoutant les propriétés ci-après. Elle sera utilisée pour décrire l'entrée nécessaire au service de création d'une réservation.
 
 ```ts
