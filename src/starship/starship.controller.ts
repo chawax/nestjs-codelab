@@ -4,8 +4,10 @@ import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
 import { DeleteResult } from 'typeorm';
 import { Starship } from './entities/starship.entity';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('starship')
+@ApiTags('starships')
+@Controller({ path: '/starships', version: '1' })
 export class StarshipController {
   constructor(private readonly starshipService: StarshipService) {}
 
