@@ -757,11 +757,14 @@ export class BearerGuard implements CanActivate {
 <li>On contrôle la présence d&#39;un header <code>authorization</code> avec comme valeur attendue celle saisie dans le fichier <code>.env</code>, récupérée grâce au service `ConfigService.</li>
 </ul>
 <p>Activons maintenant ce guard pour l&#39;ensemble des routes de l&#39;application en ajoutant les lignes suivantes dans le fichier <code>main.ts</code> :</p>
-<pre><code language="language-ts" class="language-ts">app.useGlobalGuards(new BearerGuard(configService));
+<pre><code language="language-ts" class="language-ts">  const configService = app.get&lt;ConfigService&gt;(ConfigService);
+
+  // SECURITY
+  app.useGlobalGuards(new BearerGuard(configService));
 </code></pre>
 <p>Nous devons maintenant configurer Swagger pour activer la saisie du header <code>authorization</code> dans Swagger UI.</p>
 <p>Toujours dans le fichier <code>main.ts</code> modifier la configuration de Swagger en faisant appel à la méthode <code>addBearerAuth</code>.</p>
-<pre><code language="language-ts" class="language-ts">const config = new DocumentBuilder()
+<pre><code language="language-ts" class="language-ts">  const config = new DocumentBuilder()
     .setTitle(&#39;Form Earth to Moon API&#39;)
     .setDescription(&#39;A codelab to discover NestJs and more&#39;)
     .setVersion(&#39;1.0&#39;)

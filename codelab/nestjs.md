@@ -938,7 +938,10 @@ Quelques explications :
 Activons maintenant ce guard pour l'ensemble des routes de l'application en ajoutant les lignes suivantes dans le fichier `main.ts` : 
 
 ```ts
-app.useGlobalGuards(new BearerGuard(configService));
+  const configService = app.get<ConfigService>(ConfigService);
+
+  // SECURITY
+  app.useGlobalGuards(new BearerGuard(configService));
 ```
 
 Nous devons maintenant configurer Swagger pour activer la saisie du header `authorization` dans Swagger UI.
@@ -946,7 +949,7 @@ Nous devons maintenant configurer Swagger pour activer la saisie du header `auth
 Toujours dans le fichier `main.ts` modifier la configuration de Swagger en faisant appel à la méthode `addBearerAuth`.
 
 ```ts
-const config = new DocumentBuilder()
+  const config = new DocumentBuilder()
     .setTitle('Form Earth to Moon API')
     .setDescription('A codelab to discover NestJs and more')
     .setVersion('1.0')
