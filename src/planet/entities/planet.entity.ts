@@ -1,1 +1,5 @@
-export class Planet {}
+export class Planet {
+  name: string;
+
+  distanceToEarth: number;
+}
