@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DeleteResult } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
@@ -12,23 +13,37 @@ export class PlanetService {
     private readonly planetRepository: Repository<Planet>,
   ) {}
 
-  create(createPlanetDto: CreatePlanetDto) {
-    return 'This action adds a new planet';
+  create(createPlanetDto: CreatePlanetDto): Promise<Planet> {
+    return this.planetRepository.save(createPlanetDto);
   }
 
   findAll(): Promise<Planet[]> {
     return this.planetRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} planet`;
+  findOneByUuid(uuid: string): Promise<Planet | null> {
+    return this.planetRepository.findOneBy({ uuid });
   }
 
-  update(id: number, updatePlanetDto: UpdatePlanetDto) {
-    return `This action updates a #${id} planet`;
+  async update(uuid: string, updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    await this.planetRepository.save({ id: planet.id, ...updatePlanetDto });
+
+    return this.findOneByUuid(uuid);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} planet`;
+  async remove(uuid: string): Promise<DeleteResult> {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    return this.planetRepository.delete({ uuid });
   }
 }

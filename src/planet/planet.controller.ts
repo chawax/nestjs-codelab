@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, ParseUUIDPipe } from '@nestjs/common';
 import { PlanetService } from './planet.service';
 import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
+import { Planet } from './entities/planet.entity';
+import { DeleteResult } from 'typeorm';
 
 @Controller('planet')
 export class PlanetController {
@@ -17,18 +19,24 @@ export class PlanetController {
     return this.planetService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.planetService.findOne(+id);
+  @Get(':uuid')
+  async findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Planet> {
+    const planet = await this.planetService.findOneByUuid(uuid);
+
+    if (planet) {
+      return planet;
+    }
+
+    throw new NotFoundException();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlanetDto: UpdatePlanetDto) {
-    return this.planetService.update(+id, updatePlanetDto);
+  @Patch(':uuid')
+  update(@Param('uuid', new ParseUUIDPipe()) uuid: string, @Body() updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
+    return this.planetService.update(uuid, updatePlanetDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.planetService.remove(+id);
+  @Delete(':uuid')
+  remove(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<DeleteResult> {
+    return this.planetService.remove(uuid);
   }
 }
