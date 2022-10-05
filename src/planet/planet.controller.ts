@@ -4,8 +4,10 @@ import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
 import { Planet } from './entities/planet.entity';
 import { DeleteResult } from 'typeorm';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('planet')
+@ApiTags('planets')
+@Controller({ path: '/planets', version: '1' })
 export class PlanetController {
   constructor(private readonly planetService: PlanetService) {}
 
