@@ -351,12 +351,306 @@ Faisons de même pour le service `StarshipService` :
 
 Les données `planet` et `starship` sont mainteanant récupérées depuis la base de données. On peut le tester avec [http://localhost:3000/planet](http://localhost:3000/planet) et [http://localhost:3000/starship](http://localhost:3000/starship).
 
-## Step 5 - ODA
+## CRUD Planet et Starship
 Duration: 10:00
 
-Ecriture en base
+Nous allons maintenant rajouter les opérations de récupération unitaire et d'écrtirure en base de données.
 
-Objets DTO pour la création / modification avec utilisation de `PartialType` pour `starship` et `planet`
+Modifions `src\planet\dto\create-planet.dto.ts` pour rajouter les propriétés utiles à la création d'une planète. On y ajoute des annotations utiles à l'exposition Swagger et à la validation des données :
+
+```ts
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  distanceToEarth: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+```
+
+`UpdatePlanetDto` hérite partiellement de `CreatePlanetDto` en rajoutant les propriétés nécessaires à la mise à jour :
+
+```ts
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  distanceToEarth: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+```
+
+Procédons de même pour `CreateStarshipDto`  :
+
+```ts
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  speed: number;
+  
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  kilometerPrice: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+```
+
+Et pour `UpdateStarshipDto` :
+
+```ts
+  @ApiProperty()
+  @Expose()
+  @IsNotEmpty()
+  @IsUUID()
+  @IsOptional()
+  uuid: string;
+```
+
+Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans `src\main.ts` :
+```ts
+  //------- IN & OUT
+  // Enables global behaviors on incoming DTO
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Only expose attributes wille be accepted on incoming DTO
+      transform: true, // Automatically converts attributes from incoming DTO when possible
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // Enables global behaviors on outgoing entities
+  // For examples, @Exclude decorators will be processed
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+```
+
+Modifions `PlanetService` pour utiliser les DTO et le repository.
+
+Commençons par la méthode `create()`. Le type de retour est modifié pour correspondre au type de retour de la méthode `save()` du repository :
+```ts
+  create(createPlanetDto: CreatePlanetDto): Promise<Planet> {
+    return this.planetRepository.save(createPlanetDto);
+  }
+```
+
+Remplaçons la méthode `findOne()` pour une méthode `findOneByUuid()` qui recherche une planète en fonction de son UUID :
+```ts
+  findOneByUuid(uuid: string): Promise<Planet | null> {
+    return this.planetRepository.findOneBy({ uuid });
+  }
+```
+
+La méthode `update()` est modifiée pour prendre en entrée un UUID plutôt qu'un id. Elle renvoie un obejt de type `Promise<Planet>` :
+```ts
+  async update(uuid: string, updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    await this.planetRepository.save({ id: planet.id, ...updatePlanetDto });
+
+    return this.findOneByUuid(uuid);
+  }
+```
+
+Idem pour la méthode `remove()` :
+```ts
+  async remove(uuid: string): Promise<DeleteResult> {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    return this.planetRepository.delete({ uuid });
+  }
+```
+
+La classe `PlanetController` doit être modifiée pour prendre en compte nos modifications sur `PlanetService` et pour utiliser des UUID :
+```ts
+  @Get(':uuid')
+  async findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Planet> {
+    const planet = await this.planetService.findOneByUuid(uuid);
+
+    if (planet) {
+      return planet;
+    }
+
+    throw new NotFoundException();
+  }
+```
+
+```ts
+  @Patch(':uuid')
+  update(@Param('uuid', new ParseUUIDPipe()) uuid: string, @Body() updatePlanetDto: UpdatePlanetDto): Promise<Planet> {
+    return this.planetService.update(uuid, updatePlanetDto);
+  }
+```
+
+```ts
+  @Delete(':uuid')
+  remove(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<DeleteResult> {
+    return this.planetService.remove(uuid);
+  }
+```
+
+Enfin modifions les annotations de la classe pour versionner l'API et améiorer la lisibilité dans Swagger :
+```ts
+  @ApiTags('planets')
+  @Controller({ path: '/planets', version: '1' })
+  export class PlanetController {
+```
+
+Procédons de même pour `StarshipService` :
+
+```ts
+  create(createStarshipDto: CreateStarshipDto): Promise<Starship> {
+    return this.starshipRepository.save(createStarshipDto);
+  }
+```
+
+```ts
+  findOneByUuid(uuid: string): Promise<Starship | null> {
+    return this.starshipRepository.findOneBy({ uuid });
+  }
+```
+
+```ts
+  async update(uuid: string, updateStarshipDto: UpdateStarshipDto): Promise<Starship> {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    await this.starshipRepository.save({ id: starship.id, ...updateStarshipDto });
+
+    return this.findOneByUuid(uuid);
+  }
+```
+
+```ts
+  async remove(uuid: string): Promise<DeleteResult> {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    return this.starshipRepository.delete({ uuid });
+  }
+```
+
+Et pour `StarshipController` :
+
+```ts
+  @Get(':uuid')
+  findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<Starship> {
+    return this.starshipService.findOneByUuid(uuid);
+  }
+```
+
+```ts
+  @Patch(':uuid')
+  update(
+    @Param('uuid', new ParseUUIDPipe()) uuid: string,
+    @Body() updateStarshipDto: UpdateStarshipDto,
+  ): Promise<Starship> {
+    return this.starshipService.update(uuid, updateStarshipDto);
+  }
+```
+
+```ts
+  @Delete(':uuid')
+  remove(@Param('uuid', new ParseUUIDPipe()) uuid: string): Promise<DeleteResult> {
+    return this.starshipService.remove(uuid);
+  }
+```
+
+```ts
+@ApiTags('starships')
+@Controller({ path: '/starships', version: '1' })
+export class StarshipController {
+```
+
+Nous pouvons maintenant utiliser toutes les opération CRUD sur Planet et Starship via Swagger.
+
+Créons des planètes via la route `POST` `/v1/planets` :
+
+```json
+{
+  "name": "Mercure",
+  "distanceToEarth": 91690000,
+  "active": true
+}
+```
+
+```json
+{
+  "name": "Jupiter",
+  "distanceToEarth": 628730000,
+  "active": true
+}
+```
+
+```json
+{
+  "name": "Saturne",
+  "distanceToEarth": 1275000000,
+  "active": true
+}
+```
+
+```json
+{
+  "name": "Uranus",
+  "distanceToEarth": 2723950000,
+  "active": true
+}
+```
+
+```json
+{
+  "name": "Neptune",
+  "distanceToEarth": 4351400000,
+  "active": true
+}
+```
+
+Créons un starship via la route `POST` `/v1/starships` :
+
+```json
+{
+  "name": "SpaceX Starship",
+  "speed": 27000,
+  "kilometerPrice": 250000,
+  "active": true
+}
+```
 
 ## Création de la ressource `Booking`
 

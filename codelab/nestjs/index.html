@@ -289,9 +289,240 @@ export class DefaultEntity {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 5 - ODA" duration="10">
-        <p>Ecriture en base</p>
-<p>Objets DTO pour la création / modification avec utilisation de <code>PartialType</code> pour <code>starship</code> et <code>planet</code></p>
+      <google-codelab-step label="CRUD Planet et Starship" duration="10">
+        <p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écrtirure en base de données.</p>
+<p>Modifions <code>src\planet\dto\create-planet.dto.ts</code> pour rajouter les propriétés utiles à la création d&#39;une planète. On y ajoute des annotations utiles à l&#39;exposition Swagger et à la validation des données :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  distanceToEarth: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+</code></pre>
+<p><code>UpdatePlanetDto</code> hérite partiellement de <code>CreatePlanetDto</code> en rajoutant les propriétés nécessaires à la mise à jour :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  distanceToEarth: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+</code></pre>
+<p>Procédons de même pour <code>CreateStarshipDto</code>  :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  speed: number;
+  
+  @ApiProperty()
+  @Expose()
+  @IsNumber()
+  kilometerPrice: number;
+
+  @ApiProperty()
+  @Expose()
+  @IsBoolean()
+  active: boolean;
+</code></pre>
+<p>Et pour <code>UpdateStarshipDto</code> :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiProperty()
+  @Expose()
+  @IsNotEmpty()
+  @IsUUID()
+  @IsOptional()
+  uuid: string;
+</code></pre>
+<p>Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans <code>src\main.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">  //------- IN &amp; OUT
+  // Enables global behaviors on incoming DTO
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Only expose attributes wille be accepted on incoming DTO
+      transform: true, // Automatically converts attributes from incoming DTO when possible
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // Enables global behaviors on outgoing entities
+  // For examples, @Exclude decorators will be processed
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+</code></pre>
+<p>Modifions <code>PlanetService</code> pour utiliser les DTO et le repository.</p>
+<p>Commençons par la méthode <code>create()</code>. Le type de retour est modifié pour correspondre au type de retour de la méthode <code>save()</code> du repository :</p>
+<pre><code language="language-ts" class="language-ts">  create(createPlanetDto: CreatePlanetDto): Promise&lt;Planet&gt; {
+    return this.planetRepository.save(createPlanetDto);
+  }
+</code></pre>
+<p>Remplaçons la méthode <code>findOne()</code> pour une méthode <code>findOneByUuid()</code> qui recherche une planète en fonction de son UUID :</p>
+<pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Planet | null&gt; {
+    return this.planetRepository.findOneBy({ uuid });
+  }
+</code></pre>
+<p>La méthode <code>update()</code> est modifiée pour prendre en entrée un UUID plutôt qu&#39;un id. Elle renvoie un obejt de type <code>Promise<Planet></code> :</p>
+<pre><code language="language-ts" class="language-ts">  async update(uuid: string, updatePlanetDto: UpdatePlanetDto): Promise&lt;Planet&gt; {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    await this.planetRepository.save({ id: planet.id, ...updatePlanetDto });
+
+    return this.findOneByUuid(uuid);
+  }
+</code></pre>
+<p>Idem pour la méthode <code>remove()</code> :</p>
+<pre><code language="language-ts" class="language-ts">  async remove(uuid: string): Promise&lt;DeleteResult&gt; {
+    const planet = await this.findOneByUuid(uuid);
+
+    if (!planet) {
+      throw new NotFoundException();
+    }
+
+    return this.planetRepository.delete({ uuid });
+  }
+</code></pre>
+<p>La classe <code>PlanetController</code> doit être modifiée pour prendre en compte nos modifications sur <code>PlanetService</code> et pour utiliser des UUID :</p>
+<pre><code language="language-ts" class="language-ts">  @Get(&#39;:uuid&#39;)
+  async findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Planet&gt; {
+    const planet = await this.planetService.findOneByUuid(uuid);
+
+    if (planet) {
+      return planet;
+    }
+
+    throw new NotFoundException();
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Patch(&#39;:uuid&#39;)
+  update(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string, @Body() updatePlanetDto: UpdatePlanetDto): Promise&lt;Planet&gt; {
+    return this.planetService.update(uuid, updatePlanetDto);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Delete(&#39;:uuid&#39;)
+  remove(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;DeleteResult&gt; {
+    return this.planetService.remove(uuid);
+  }
+</code></pre>
+<p>Enfin modifions les annotations de la classe pour versionner l&#39;API et améiorer la lisibilité dans Swagger :</p>
+<pre><code language="language-ts" class="language-ts">  @ApiTags(&#39;planets&#39;)
+  @Controller({ path: &#39;/planets&#39;, version: &#39;1&#39; })
+  export class PlanetController {
+</code></pre>
+<p>Procédons de même pour <code>StarshipService</code> :</p>
+<pre><code language="language-ts" class="language-ts">  create(createStarshipDto: CreateStarshipDto): Promise&lt;Starship&gt; {
+    return this.starshipRepository.save(createStarshipDto);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Starship | null&gt; {
+    return this.starshipRepository.findOneBy({ uuid });
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  async update(uuid: string, updateStarshipDto: UpdateStarshipDto): Promise&lt;Starship&gt; {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    await this.starshipRepository.save({ id: starship.id, ...updateStarshipDto });
+
+    return this.findOneByUuid(uuid);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  async remove(uuid: string): Promise&lt;DeleteResult&gt; {
+    const starship = await this.findOneByUuid(uuid);
+
+    if (!starship) {
+      throw new NotFoundException();
+    }
+
+    return this.starshipRepository.delete({ uuid });
+  }
+</code></pre>
+<p>Et pour <code>StarshipController</code> :</p>
+<pre><code language="language-ts" class="language-ts">  @Get(&#39;:uuid&#39;)
+  findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Starship&gt; {
+    return this.starshipService.findOneByUuid(uuid);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Patch(&#39;:uuid&#39;)
+  update(
+    @Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string,
+    @Body() updateStarshipDto: UpdateStarshipDto,
+  ): Promise&lt;Starship&gt; {
+    return this.starshipService.update(uuid, updateStarshipDto);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">  @Delete(&#39;:uuid&#39;)
+  remove(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;DeleteResult&gt; {
+    return this.starshipService.remove(uuid);
+  }
+</code></pre>
+<pre><code language="language-ts" class="language-ts">@ApiTags(&#39;starships&#39;)
+@Controller({ path: &#39;/starships&#39;, version: &#39;1&#39; })
+export class StarshipController {
+</code></pre>
+<p>Nous pouvons maintenant utiliser toutes les opération CRUD sur Planet et Starship via Swagger.</p>
+<p>Créons des planètes via la route <code>POST</code> <code>/v1/planets</code> :</p>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Mercure&#34;,
+  &#34;distanceToEarth&#34;: 91690000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Jupiter&#34;,
+  &#34;distanceToEarth&#34;: 628730000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Saturne&#34;,
+  &#34;distanceToEarth&#34;: 1275000000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Uranus&#34;,
+  &#34;distanceToEarth&#34;: 2723950000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;Neptune&#34;,
+  &#34;distanceToEarth&#34;: 4351400000,
+  &#34;active&#34;: true
+}
+</code></pre>
+<p>Créons un starship via la route <code>POST</code> <code>/v1/starships</code> :</p>
+<pre><code language="language-json" class="language-json">{
+  &#34;name&#34;: &#34;SpaceX Starship&#34;,
+  &#34;speed&#34;: 27000,
+  &#34;kilometerPrice&#34;: 250000,
+  &#34;active&#34;: true
+}
+</code></pre>
 
 
       </google-codelab-step>
