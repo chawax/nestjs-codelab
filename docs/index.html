@@ -237,6 +237,7 @@ export class DefaultEntity {
 </code></pre>
 <p>Dans <code>src\app.module.ts</code>, dans la section <code>imports</code>, ajoutons le chargement du module TypeORM et de la base de données indiquée dans le fichier de configuration :</p>
 <pre><code language="language-ts" class="language-ts">  imports: [
+    HealthModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -252,7 +253,6 @@ export class DefaultEntity {
     }),
     PlanetModule,
     StarshipModule,
-    BookingModule,
   ],
 </code></pre>
 <p>Dans <code>src\planet\planet.module.ts</code>, ajoutons l&#39;import de TypeORM pour l&#39;entité <code>Planet</code> et l&#39;export du service <code>PlanetService</code> :</p>
@@ -310,18 +310,10 @@ export class DefaultEntity {
 <p><code>UpdatePlanetDto</code> hérite partiellement de <code>CreatePlanetDto</code> en rajoutant les propriétés nécessaires à la mise à jour :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiProperty()
   @Expose()
-  @IsString()
-  name: string;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  distanceToEarth: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsBoolean()
-  active: boolean;
+  @IsNotEmpty()
+  @IsUUID()
+  @IsOptional()
+  uuid: string;
 </code></pre>
 <p>Procédons de même pour <code>CreateStarshipDto</code>  :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiProperty()
@@ -638,7 +630,7 @@ departureDate: Date;
     return this.bookingRepository.save(booking);
 }
 </code></pre>
-<p>Modifions la méthode <code>findOne()</code> pour prendre en compte un UUID. La propriété <code>relations</code> permet de charger le vaisseau et la planète de destination quand on charge une réservation.</p>
+<p>Remplaçons la méthode <code>findOne</code> par une méthode <code>findOneByUuid</code> pour prendre en compte un UUID. La propriété <code>relations</code> permet de charger le vaisseau et la planète de destination quand on charge une réservation.</p>
 <pre><code language="language-ts" class="language-ts">  findOneByUuid(uuid: string): Promise&lt;Booking&gt; {
     return this.bookingRepository.findOne({ where: { uuid }, relations: [&#39;starship&#39;, &#39;destination&#39;] });
   }

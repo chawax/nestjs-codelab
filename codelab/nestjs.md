@@ -289,6 +289,7 @@ SQL_MEMORY_DB_SHARED=./db/planet-starship.sqlite
 Dans `src\app.module.ts`, dans la section `imports`, ajoutons le chargement du module TypeORM et de la base de données indiquée dans le fichier de configuration :
 ```ts
   imports: [
+    HealthModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -304,7 +305,6 @@ Dans `src\app.module.ts`, dans la section `imports`, ajoutons le chargement du m
     }),
     PlanetModule,
     StarshipModule,
-    BookingModule,
   ],
 ```
 
@@ -380,18 +380,10 @@ Modifions `src\planet\dto\create-planet.dto.ts` pour rajouter les propriétés u
 ```ts
   @ApiProperty()
   @Expose()
-  @IsString()
-  name: string;
-
-  @ApiProperty()
-  @Expose()
-  @IsNumber()
-  distanceToEarth: number;
-
-  @ApiProperty()
-  @Expose()
-  @IsBoolean()
-  active: boolean;
+  @IsNotEmpty()
+  @IsUUID()
+  @IsOptional()
+  uuid: string;
 ```
 
 Procédons de même pour `CreateStarshipDto`  :
@@ -795,7 +787,8 @@ async create(createBookingDto: CreateBookingDto): Promise<Booking> {
 }
 ```
 
-Modifions la méthode `findOne()` pour prendre en compte un UUID. La propriété `relations` permet de charger le vaisseau et la planète de destination quand on charge une réservation.
+Remplaçons la méthode `findOne` par une méthode `findOneByUuid` pour prendre en compte un UUID. La propriété `relations` permet de charger le vaisseau et la planète de destination quand on charge une réservation.
+
 ```ts
   findOneByUuid(uuid: string): Promise<Booking> {
     return this.bookingRepository.findOne({ where: { uuid }, relations: ['starship', 'destination'] });
