@@ -40,6 +40,8 @@ npm i
 ## Première API
 Duration: 10:00
 
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step1" pour débuter cette étape.</aside>
+
 Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.
 
 La première route de notre API consiste à donner l'état de santé de notre application.
@@ -108,6 +110,8 @@ L'interface Swagger est accessible via [http://localhost:3000/api](http://localh
 
 ## Ressources Planet et Starship
 Duration: 10:00
+
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step2" pour débuter cette étape.</aside>
 
 Nous allons maintenant créer une API pour la gestion de planètes.
 Pour ce faire, nous allons créer des classes [controller](https://docs.nestjs.com/controllers), [service](https://docs.nestjs.com/providers#services), DTO et entity et placer le tout dans un module dédié.
@@ -222,6 +226,8 @@ De même que pour `planet`, la route qui liste tous les vaisseaux peut être tes
 
 ## TypeORM
 Duration: 10:00
+
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step3" pour débuter cette étape.</aside>
 
 Nous allons maintenant activer l'ORM [TypeORM](https://typeorm.io/) pour lire des données dans une base de données [SQLite](https://www.sqlite.org/).
 
@@ -353,6 +359,8 @@ Les données `planet` et `starship` sont mainteanant récupérées depuis la bas
 
 ## CRUD Planet et Starship
 Duration: 20:00
+
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step4" pour débuter cette étape.</aside>
 
 Nous allons maintenant rajouter les opérations de récupération unitaire et d'écrtirure en base de données.
 
@@ -510,7 +518,7 @@ La classe `PlanetController` doit être modifiée pour prendre en compte nos mod
   }
 ```
 
-Enfin modifions les annotations de la classe pour versionner l'API et améiorer la lisibilité dans Swagger :
+Enfin modifions les annotations de la classe pour versionner l'API et améliorer la lisibilité dans Swagger :
 ```ts
   @ApiTags('planets')
   @Controller({ path: '/planets', version: '1' })
@@ -646,6 +654,8 @@ Créons un starship via la route `POST` `/v1/starships` :
 
 ## Création de la ressource `Booking`
 Duration: 15:00
+
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step5" pour débuter cette étape.</aside>
 
 Dans cette étape nous allons créer une nouvelle ressource : `booking` :
 
@@ -885,6 +895,8 @@ Il est maintenant possible de manipuler les bookings avec leur API dans Swagger.
 ## Sécurisation des contrôleurs
 Duration: 10:00
 
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step6" pour débuter cette étape.</aside>
+
 Nous allons sécuriser l'accès à nos endoints en exigeant la fourniture d'un bearer d'authentification dans les headers des requêtes. Nous allons créer un "guard", un composant NestJS qui permet de contrôler l'accès à des routes.
 
 Dans le fichier `.env` ajouter la variable d'environnement `API_BEARER` qui définit la valeur attendue pour le bearer :
@@ -971,9 +983,11 @@ Il ne reste plus qu'à lancer Swagger UI. Tester les services sans bearer : on a
 ## Gestion de la configuration
 Duration: 10:00
 
-Nous allons maintenant améliorer la gestion de configuration en bloquant le démarrage de l'application si des variables d'environnement ne sont pas correctes et en évitant l'accès direct aux variables d'environnement dans les composants de l'application.
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step7" pour débuter cette étape.</aside>
 
-Créons le fichier `config/configuration.ts`:
+Nous allons maintenant améliorer la gestion de configuration en bloquant le démarrage de l'application si des variables d'environnement ne sont pas correctes et en évitant l'accès direct aux variables d'environnement depuis les composants de l'application.
+
+Créons le fichier `config/configuration.ts` qui va définir le mapping entre nos clés de configuration et des variables d'environnement :
 
 ```ts
 export default () => ({
@@ -987,7 +1001,7 @@ export default () => ({
 });
 ```
 
-Créons un schéma de validation pour cette configuration dans le fichier `config/schema.ts` :
+Créons un schéma de validation pour cette configuration dans le fichier `config/schema.ts` en utilisant la librairie `Joi` :
 
 ```ts
 import * as Joi from 'joi';
@@ -1019,7 +1033,27 @@ import configuration from './config/configuration';
 import configurationSchema from './config/schema';
 ```
 
-Mettons en commentaire une des deux variables d'environnement définies dans le fichier `.env` et démarrons le serveur avec `npm start` : on doit avoir un message d'erreur indiquant le nom de la variable manquante.
+Modifions le paramétrage du port d'écoute de l'application dans `main.ts`:
 
-Décommentons la variable : l'application démarre bien.
+```ts
+await app.listen(configService.get('port'));
+```
+
+Ainsi que la clé permettant de récupérer path de la base de données, toujours dans `app.module.ts` :
+
+```ts
+database: configService.get('database.path'),
+```
+
+Enfin modifions la clé de récupération du bearer d'authentification dans `bearer.guard.ts` :
+
+```ts
+if (request?.headers?.authorization === `Bearer ${this.configService.get<string>('security.apiBearer')}`) {
+```
+
+Mettons en commentaire la variable d'environnement `API_BEARER` dans le fichier `.env` et démarrons le serveur avec `npm run start:dev` : on doit avoir un message d'erreur indiquant le nom de la variable manquante.
+
+Décommentons la variable et relançons `npm run start:dev` : l'application démarre bien sur le port `3000` et les services fonctionnent correctement.
+
+Ajoutons maintenant un paramètre `PORT` avec la valeur `8080` dans le fichier `.env` et relançons `npm run start:dev` : l'application démarre désormais sur le port `8080`.
 

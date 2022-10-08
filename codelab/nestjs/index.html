@@ -52,7 +52,9 @@ npm i
       </google-codelab-step>
     
       <google-codelab-step label="Première API" duration="10">
-        <p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step1&#34; pour débuter cette étape.</p>
+</aside>
+<p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
 <p>La première route de notre API consiste à donner l&#39;état de santé de notre application.</p>
 <p>Créons le module <code>health</code> :</p>
 <pre><code language="language-bash" class="language-bash">nest g module health
@@ -98,7 +100,9 @@ check(): string {
       </google-codelab-step>
     
       <google-codelab-step label="Ressources Planet et Starship" duration="10">
-        <p>Nous allons maintenant créer une API pour la gestion de planètes. Pour ce faire, nous allons créer des classes <a href="https://docs.nestjs.com/controllers" target="_blank">controller</a>, <a href="https://docs.nestjs.com/providers#services" target="_blank">service</a>, DTO et entity et placer le tout dans un module dédié.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step2&#34; pour débuter cette étape.</p>
+</aside>
+<p>Nous allons maintenant créer une API pour la gestion de planètes. Pour ce faire, nous allons créer des classes <a href="https://docs.nestjs.com/controllers" target="_blank">controller</a>, <a href="https://docs.nestjs.com/providers#services" target="_blank">service</a>, DTO et entity et placer le tout dans un module dédié.</p>
 <p>Tout cela peut être préparé avec la commande suivante :</p>
 <pre><code language="language-bash" class="language-bash">nest g resource planet
 </code></pre>
@@ -192,7 +196,9 @@ kilometerPrice: number;
       </google-codelab-step>
     
       <google-codelab-step label="TypeORM" duration="10">
-        <p>Nous allons maintenant activer l&#39;ORM <a href="https://typeorm.io/" target="_blank">TypeORM</a> pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step3&#34; pour débuter cette étape.</p>
+</aside>
+<p>Nous allons maintenant activer l&#39;ORM <a href="https://typeorm.io/" target="_blank">TypeORM</a> pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>.</p>
 <p>Sur les classes entity, nous rajoutons l&#39;annotation <code>@Entity()</code> pour indiquer à TypeORM de faire le mapping avec une table de la base de données.</p>
 <p>Pour <code>planet</code> :</p>
 <pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;planet&#39; })
@@ -290,7 +296,9 @@ export class DefaultEntity {
       </google-codelab-step>
     
       <google-codelab-step label="CRUD Planet et Starship" duration="20">
-        <p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écrtirure en base de données.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step4&#34; pour débuter cette étape.</p>
+</aside>
+<p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écrtirure en base de données.</p>
 <p>Modifions <code>src\planet\dto\create-planet.dto.ts</code> pour rajouter les propriétés utiles à la création d&#39;une planète. On y ajoute des annotations utiles à l&#39;exposition Swagger et à la validation des données :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiProperty()
   @Expose()
@@ -416,7 +424,7 @@ export class DefaultEntity {
     return this.planetService.remove(uuid);
   }
 </code></pre>
-<p>Enfin modifions les annotations de la classe pour versionner l&#39;API et améiorer la lisibilité dans Swagger :</p>
+<p>Enfin modifions les annotations de la classe pour versionner l&#39;API et améliorer la lisibilité dans Swagger :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiTags(&#39;planets&#39;)
   @Controller({ path: &#39;/planets&#39;, version: &#39;1&#39; })
   export class PlanetController {
@@ -521,7 +529,9 @@ export class StarshipController {
     
       <google-codelab-step label="Création de la ressource 
 Booking" duration="15">
-        <p>Dans cette étape nous allons créer une nouvelle ressource : <code>booking</code> :</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step5&#34; pour débuter cette étape.</p>
+</aside>
+<p>Dans cette étape nous allons créer une nouvelle ressource : <code>booking</code> :</p>
 <pre><code language="language-bash" class="language-bash">nest g resource booking
 </code></pre>
 <p>Dans <code>BookingModule</code>, ajoutons l&#39;import des modules nécessaires :</p>
@@ -713,7 +723,9 @@ findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Bo
       </google-codelab-step>
     
       <google-codelab-step label="Sécurisation des contrôleurs" duration="10">
-        <p>Nous allons sécuriser l&#39;accès à nos endoints en exigeant la fourniture d&#39;un bearer d&#39;authentification dans les headers des requêtes. Nous allons créer un &#34;guard&#34;, un composant NestJS qui permet de contrôler l&#39;accès à des routes.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step6&#34; pour débuter cette étape.</p>
+</aside>
+<p>Nous allons sécuriser l&#39;accès à nos endoints en exigeant la fourniture d&#39;un bearer d&#39;authentification dans les headers des requêtes. Nous allons créer un &#34;guard&#34;, un composant NestJS qui permet de contrôler l&#39;accès à des routes.</p>
 <p>Dans le fichier <code>.env</code> ajouter la variable d&#39;environnement <code>API_BEARER</code> qui définit la valeur attendue pour le bearer :</p>
 <pre><code>API_BEARER=MyBearer
 </code></pre>
@@ -772,13 +784,61 @@ export class BearerGuard implements CanActivate {
 @Controller({ path: &#39;/bookings&#39;, version: &#39;1&#39; })
 export class BookingController {
 </code></pre>
-<p>Il ne reste plus qu&#39;à lancer Swagger UI. Tester les services sans bearer et se rendre compte qu&#39;on a une erreur 403. Puis cliquer sur le bouton <code>Authenticate</code>, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.</p>
+<p>Il ne reste plus qu&#39;à lancer Swagger UI. Tester les services sans bearer : on a une erreur 403. Puis cliquer sur le bouton <code>Authenticate</code>, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.</p>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Step 8 - OTH" duration="10">
-        <p>Gestion de la configuration</p>
+      <google-codelab-step label="Gestion de la configuration" duration="10">
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step7&#34; pour débuter cette étape.</p>
+</aside>
+<p>Nous allons maintenant améliorer la gestion de configuration en bloquant le démarrage de l&#39;application si des variables d&#39;environnement ne sont pas correctes et en évitant l&#39;accès direct aux variables d&#39;environnement depuis les composants de l&#39;application.</p>
+<p>Créons le fichier <code>config/configuration.ts</code> qui va définir le mapping entre nos clés de configuration et des variables d&#39;environnement :</p>
+<pre><code language="language-ts" class="language-ts">export default () =&gt; ({
+  port: parseInt(process.env.PORT, 10) || 3000,
+  database: {
+    path: process.env.SQL_MEMORY_DB_SHARED,
+  },
+  security: {
+    apiBearer: process.env.API_BEARER,
+  },
+});
+</code></pre>
+<p>Créons un schéma de validation pour cette configuration dans le fichier <code>config/schema.ts</code> en utilisant la librairie <code>Joi</code> :</p>
+<pre><code language="language-ts" class="language-ts">import * as Joi from &#39;joi&#39;;
+
+export default Joi.object({
+  NODE_ENV: Joi.string().valid(&#39;development&#39;, &#39;production&#39;, &#39;test&#39;, &#39;provision&#39;).default(&#39;development&#39;),
+  PORT: Joi.number().default(3000),
+  SQL_MEMORY_DB_SHARED: Joi.string().required(),
+  API_BEARER: Joi.string().required(),
+});
+</code></pre>
+<p>Modifions la configuration du module <code>ConfigModule</code> dans <code>app.module.ts</code></p>
+<pre><code language="language-ts" class="language-ts">  ConfigModule.forRoot({
+    load: [configuration],
+    validationSchema: configurationSchema,
+    validationOptions: {
+      abortEarly: true,
+    },
+  }),
+</code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import configuration from &#39;./config/configuration&#39;;
+import configurationSchema from &#39;./config/schema&#39;;
+</code></pre>
+<p>Modifions le paramétrage du port d&#39;écoute de l&#39;application dans <code>main.ts</code>:</p>
+<pre><code language="language-ts" class="language-ts">await app.listen(configService.get(&#39;port&#39;));
+</code></pre>
+<p>Ainsi que la clé permettant de récupérer path de la base de données, toujours dans <code>app.module.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">database: configService.get(&#39;database.path&#39;),
+</code></pre>
+<p>Enfin modifions la clé de récupération du bearer d&#39;authentification dans <code>bearer.guard.ts</code> :</p>
+<pre><code language="language-ts" class="language-ts">if (request?.headers?.authorization === `Bearer ${this.configService.get&lt;string&gt;(&#39;security.apiBearer&#39;)}`) {
+</code></pre>
+<p>Mettons en commentaire la variable d&#39;environnement <code>API_BEARER</code> dans le fichier <code>.env</code> et démarrons le serveur avec <code>npm run start:dev</code> : on doit avoir un message d&#39;erreur indiquant le nom de la variable manquante.</p>
+<p>Décommentons la variable et relançons <code>npm run start:dev</code> : l&#39;application démarre bien sur le port <code>3000</code> et les services fonctionnent correctement.</p>
+<p>Ajoutons maintenant un paramètre <code>PORT</code> avec la valeur <code>8080</code> dans le fichier <code>.env</code> et relançons <code>npm run start:dev</code> : l&#39;application démarre désormais sur le port <code>8080</code>.</p>
 
 
       </google-codelab-step>
