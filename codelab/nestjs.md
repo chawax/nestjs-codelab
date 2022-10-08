@@ -966,10 +966,60 @@ Enfin sur chacun des contrôleurs ajouter le décorateur `@ApiBearerAuth` import
 export class BookingController {
 ```
 
-Il ne reste plus qu'à lancer Swagger UI. Tester les services sans bearer et se rendre compte qu'on a une erreur 403. Puis cliquer sur le bouton `Authenticate`, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.
+Il ne reste plus qu'à lancer Swagger UI. Tester les services sans bearer : on a une erreur 403. Puis cliquer sur le bouton `Authenticate`, saisir la valeur du bearer (juste la valeur de la clé) et tester les services, ils doivent désormais passer.
 
-## Step 8 - OTH
+## Gestion de la configuration
 Duration: 10:00
 
-Gestion de la configuration
+Nous allons maintenant améliorer la gestion de configuration en bloquant le démarrage de l'application si des variables d'environnement ne sont pas correctes et en évitant l'accès direct aux variables d'environnement dans les composants de l'application.
+
+Créons le fichier `config/configuration.ts`:
+
+```ts
+export default () => ({
+  port: parseInt(process.env.PORT, 10) || 3000,
+  database: {
+    path: process.env.SQL_MEMORY_DB_SHARED,
+  },
+  security: {
+    apiBearer: process.env.API_BEARER,
+  },
+});
+```
+
+Créons un schéma de validation pour cette configuration dans le fichier `config/schema.ts` :
+
+```ts
+import * as Joi from 'joi';
+
+export default Joi.object({
+  NODE_ENV: Joi.string().valid('development', 'production', 'test', 'provision').default('development'),
+  PORT: Joi.number().default(3000),
+  SQL_MEMORY_DB_SHARED: Joi.string().required(),
+  API_BEARER: Joi.string().required(),
+});
+```
+
+Modifions la configuration du module `ConfigModule` dans `app.module.ts`
+
+```ts
+  ConfigModule.forRoot({
+    load: [configuration],
+    validationSchema: configurationSchema,
+    validationOptions: {
+      abortEarly: true,
+    },
+  }),
+```
+
+Avec les imports suivants :
+
+```ts
+import configuration from './config/configuration';
+import configurationSchema from './config/schema';
+```
+
+Mettons en commentaire une des deux variables d'environnement définies dans le fichier `.env` et démarrons le serveur avec `npm start` : on doit avoir un message d'erreur indiquant le nom de la variable manquante.
+
+Décommentons la variable : l'application démarre bien.
 
