@@ -11,7 +11,7 @@ export class BearerGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    if (request?.headers?.authorization === `Bearer ${this.configService.get<string>('API_BEARER')}`) {
+    if (request?.headers?.authorization === `Bearer ${this.configService.get<string>('security.apiBearer')}`) {
       return true;
     }
 

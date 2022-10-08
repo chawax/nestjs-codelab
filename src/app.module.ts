@@ -24,7 +24,7 @@ import configurationSchema from './config/schema';
       useFactory: async (configService: ConfigService) => {
         return {
           type: 'sqlite',
-          database: configService.get('SQL_MEMORY_DB_SHARED'),
+          database: configService.get('database.path'),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: true,
         } as TypeOrmModuleOptions;

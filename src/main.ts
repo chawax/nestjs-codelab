@@ -43,6 +43,6 @@ async function bootstrap() {
   // For examples, @Exclude decorators will be processed
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
-  await app.listen(3000);
+  await app.listen(configService.get('port'));
 }
 bootstrap();
