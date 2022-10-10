@@ -259,6 +259,8 @@ Créons ensuite, dans `src\utils\default-entity.ts`, la classe `DefaultEntity` q
 
 Le code de la classe `DefaultEntity` est le suivant :
 ```ts
+// src/utils/default-entity.ts
+
 import { Exclude } from "class-transformer";
 import { Column, Generated, PrimaryGeneratedColumn } from "typeorm";
 
@@ -355,14 +357,14 @@ Faisons de même pour le service `StarshipService` :
   }
 ```
 
-Les données `planet` et `starship` sont mainteanant récupérées depuis la base de données. On peut le tester avec [http://localhost:3000/planet](http://localhost:3000/planet) et [http://localhost:3000/starship](http://localhost:3000/starship).
+Les données `planet` et `starship` sont maintenant récupérées depuis la base de données. On peut le tester avec [http://localhost:3000/planet](http://localhost:3000/planet) et [http://localhost:3000/starship](http://localhost:3000/starship).
 
 ## CRUD Planet et Starship
 Duration: 20:00
 
 <aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step4" pour débuter cette étape.</aside>
 
-Nous allons maintenant rajouter les opérations de récupération unitaire et d'écrtirure en base de données.
+Nous allons maintenant rajouter les opérations de récupération unitaire et d'écriture en base de données.
 
 Modifions `src\planet\dto\create-planet.dto.ts` pour rajouter les propriétés utiles à la création d'une planète. On y ajoute des annotations utiles à l'exposition Swagger et à la validation des données :
 
@@ -435,7 +437,7 @@ Pour que les annotations soient actives, nous devons ajouter la configuration su
   // Enables global behaviors on incoming DTO
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Only expose attributes wille be accepted on incoming DTO
+      whitelist: true, // Only exposed attributes will be accepted on incoming DTO
       transform: true, // Automatically converts attributes from incoming DTO when possible
       transformOptions: { enableImplicitConversion: true },
     }),
