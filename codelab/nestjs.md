@@ -38,7 +38,7 @@ npm i
 ```
 
 ## Première API
-Duration: 10:00
+Duration: 20:00
 
 <aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step1" pour débuter cette étape.</aside>
 
@@ -67,9 +67,13 @@ check(): string {
 }
 ```
 
-L'IDE nous aide à rajouter les imports de librairies nécessaires.
+La complétion dans l'IDE nous aide à rajouter les imports de librairies nécessaires, mais au cas où voici les imports à ajouter :
 
-Vérifions que tout fonctionne :
+```ts
+import { Controller, Get } from '@nestjs/common';
+```
+
+Vérifions que tout fonctionne en lançant l'application en mode développement (live reload) :
 
 ```bash
 npm run start:dev
@@ -79,9 +83,10 @@ La route `health` est accessible dans un navigateur via [http://localhost:3000/h
 
 Nous allons maitenant activer le versionning d'API et la documentation Swagger.
 
-Dans `src\main.ts`, rajoutons la configuration nécessaire :
+Dans `src\main.ts`, rajoutons la configuration nécessaire dans la fonction `bootstrap`. Attention : l'instruction `app.listen` doit rester la dernière instruction de la fonction.
 
 ```ts
+
   // VERSIONNING
   app.enableVersioning({
     type: VersioningType.URI,
@@ -96,6 +101,12 @@ Dans `src\main.ts`, rajoutons la configuration nécessaire :
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+```
+
+Les imports à utiliser sont les suivants :
+
+```ts
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 ```
 
 Modifions `HealthController` pour rajouter un numéro de version sur son API :
@@ -225,11 +236,11 @@ findAll(): Starship[] {
 De même que pour `planet`, la route qui liste tous les vaisseaux peut être testée via Swagger ou via son URL : [http://localhost:3000/starship](http://localhost:3000/starship).
 
 ## TypeORM
-Duration: 10:00
+Duration: 20:00
 
 <aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step3" pour débuter cette étape.</aside>
 
-Nous allons maintenant activer l'ORM [TypeORM](https://typeorm.io/) pour lire des données dans une base de données [SQLite](https://www.sqlite.org/).
+Nous allons maintenant activer l'ORM [TypeORM](https://typeorm.io/) pour lire des données dans une base de données [SQLite](https://www.sqlite.org/). Une base SQLite contenant déjà des données est incluse dans le repository cloné.
 
 Sur les classes entity, nous rajoutons l'annotation `@Entity()` pour indiquer à TypeORM de faire le mapping avec une table de la base de données.
 
@@ -252,12 +263,19 @@ Puis sur chaque propriété de ces 2 classes, nous rajoutons l'annotation `@Colu
 name: string;
 ```
 
+Les imports dans ces entités sont les suivants :
+
+```ts
+import { Column, Entity } from 'typeorm';
+```
+
 Créons ensuite, dans `src\utils\default-entity.ts`, la classe `DefaultEntity` qui contient les propriétés communes à toutes les entités de notre application, à savoir :
 - `id` : un identifiant technique généré automatiquement par incrément
 - `uuid` : un identifiant métier unique au format UUID et généré automatiquement
 - `active` : un booléen indiquant si la ressource est active
 
 Le code de la classe `DefaultEntity` est le suivant :
+
 ```ts
 // src/utils/default-entity.ts
 
@@ -316,6 +334,13 @@ Dans `src\app.module.ts`, dans la section `imports`, ajoutons le chargement du m
   ],
 ```
 
+Avec les imports suivants :
+
+```ts
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+```
+
 Dans `src\planet\planet.module.ts`, ajoutons l'import de TypeORM pour l'entité `Planet` et l'export du service `PlanetService` :
 ```ts
   imports: [TypeOrmModule.forFeature([Planet])],
@@ -334,6 +359,13 @@ Dans le service `PlanetService`, ajoutons un constructeur qui injecte le reposit
     @InjectRepository(Planet)
     private readonly planetRepository: Repository<Planet>,
   ) {}
+```
+
+Avec les imports suivants :
+
+```ts
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm/repository/Repository';
 ```
 
 Puis modifions la méthode `findAll()` pour utiliser le repository qui va exécuter la requête de récupération des objets `Planet` sur la base de données. La signature de la méthode est modifiée pour renvoyer un objet `Promise<Planet[]>` :
@@ -359,8 +391,10 @@ Faisons de même pour le service `StarshipService` :
 
 Les données `planet` et `starship` sont maintenant récupérées depuis la base de données. On peut le tester avec [http://localhost:3000/planet](http://localhost:3000/planet) et [http://localhost:3000/starship](http://localhost:3000/starship).
 
+<aside class="negative">Il faut redémarrer l'application pour que les modifications des variables d'environnement soient prises en compte.</aside>
+
 ## CRUD Planet et Starship
-Duration: 20:00
+Duration: 25:00
 
 <aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step4" pour débuter cette étape.</aside>
 
@@ -385,6 +419,14 @@ Modifions `src\planet\dto\create-planet.dto.ts` pour rajouter les propriétés u
   active: boolean;
 ```
 
+Avec les imports suivants :
+
+```ts
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
+```
+
 `UpdatePlanetDto` hérite partiellement de `CreatePlanetDto` en rajoutant les propriétés nécessaires à la mise à jour :
 
 ```ts
@@ -394,6 +436,14 @@ Modifions `src\planet\dto\create-planet.dto.ts` pour rajouter les propriétés u
   @IsUUID()
   @IsOptional()
   uuid: string;
+```
+
+Avec les imports suivants :
+
+```ts
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import { IsNotEmpty, IsUUID, IsOptional } from 'class-validator';
 ```
 
 Procédons de même pour `CreateStarshipDto`  :
@@ -431,7 +481,8 @@ Et pour `UpdateStarshipDto` :
   uuid: string;
 ```
 
-Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans `src\main.ts` :
+Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans la méthode `bootstrap` de  `src\main.ts` :
+
 ```ts
   //------- IN & OUT
   // Enables global behaviors on incoming DTO
@@ -446,6 +497,12 @@ Pour que les annotations soient actives, nous devons ajouter la configuration su
   // Enables global behaviors on outgoing entities
   // For examples, @Exclude decorators will be processed
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+```
+
+Avec les imports suivants :
+
+```ts
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 ```
 
 Modifions `PlanetService` pour utiliser les DTO et le repository.
@@ -492,6 +549,13 @@ Idem pour la méthode `remove()` :
   }
 ```
 
+Avec les imports suivants :
+
+```ts
+import { NotFoundException } from '@nestjs/common';
+import { DeleteResult } from 'typeorm';
+```
+
 La classe `PlanetController` doit être modifiée pour prendre en compte nos modifications sur `PlanetService` et pour utiliser des UUID :
 ```ts
   @Get(':uuid')
@@ -525,6 +589,13 @@ Enfin modifions les annotations de la classe pour versionner l'API et améliorer
   @ApiTags('planets')
   @Controller({ path: '/planets', version: '1' })
   export class PlanetController {
+```
+
+Les imports à utiliser sont les suivants :
+
+```ts
+import { Body, ParseUUIDPipe } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 ```
 
 Procédons de même pour `StarshipService` :
@@ -722,7 +793,6 @@ Attention à l'import de `dayjs` :
 ```ts
 import * as dayjs from 'dayjs';
 ```
-
 
 Modifions la classe `CreateBookingDto` en rajoutant les propriétés ci-après. Elle sera utilisée pour décrire l'entrée nécessaire au service de création d'une réservation.
 

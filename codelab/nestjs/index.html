@@ -51,7 +51,7 @@ npm i
 
       </google-codelab-step>
     
-      <google-codelab-step label="Première API" duration="10">
+      <google-codelab-step label="Première API" duration="20">
         <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step1&#34; pour débuter cette étape.</p>
 </aside>
 <p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
@@ -68,13 +68,15 @@ check(): string {
     return &#39;Everything is OK&#39;;
 }
 </code></pre>
-<p>L&#39;IDE nous aide à rajouter les imports de librairies nécessaires.</p>
-<p>Vérifions que tout fonctionne :</p>
+<p>La complétion dans l&#39;IDE nous aide à rajouter les imports de librairies nécessaires, mais au cas où voici les imports à ajouter :</p>
+<pre><code language="language-ts" class="language-ts">import { Controller, Get } from &#39;@nestjs/common&#39;;
+</code></pre>
+<p>Vérifions que tout fonctionne en lançant l&#39;application en mode développement (live reload) :</p>
 <pre><code language="language-bash" class="language-bash">npm run start:dev
 </code></pre>
 <p>La route <code>health</code> est accessible dans un navigateur via <a href="http://localhost:3000/health" target="_blank">http://localhost:3000/health</a>.</p>
 <p>Nous allons maitenant activer le versionning d&#39;API et la documentation Swagger.</p>
-<p>Dans <code>src\main.ts</code>, rajoutons la configuration nécessaire :</p>
+<p>Dans <code>src\main.ts</code>, rajoutons la configuration nécessaire dans la fonction <code>bootstrap</code>. Attention : l&#39;instruction <code>app.listen</code> doit rester la dernière instruction de la fonction.</p>
 <pre><code language="language-ts" class="language-ts">  // VERSIONNING
   app.enableVersioning({
     type: VersioningType.URI,
@@ -89,6 +91,9 @@ check(): string {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(&#39;api&#39;, app, document);
+</code></pre>
+<p>Les imports à utiliser sont les suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { DocumentBuilder, SwaggerModule } from &#39;@nestjs/swagger&#39;;
 </code></pre>
 <p>Modifions <code>HealthController</code> pour rajouter un numéro de version sur son API :</p>
 <pre><code language="language-ts" class="language-ts">@Controller({ path: &#39;/health&#39;, version: &#39;1&#39; })
@@ -195,10 +200,10 @@ kilometerPrice: number;
 
       </google-codelab-step>
     
-      <google-codelab-step label="TypeORM" duration="10">
+      <google-codelab-step label="TypeORM" duration="20">
         <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step3&#34; pour débuter cette étape.</p>
 </aside>
-<p>Nous allons maintenant activer l&#39;ORM <a href="https://typeorm.io/" target="_blank">TypeORM</a> pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>.</p>
+<p>Nous allons maintenant activer l&#39;ORM <a href="https://typeorm.io/" target="_blank">TypeORM</a> pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>. Une base SQLite contenant déjà des données est incluse dans le repository cloné.</p>
 <p>Sur les classes entity, nous rajoutons l&#39;annotation <code>@Entity()</code> pour indiquer à TypeORM de faire le mapping avec une table de la base de données.</p>
 <p>Pour <code>planet</code> :</p>
 <pre><code language="language-ts" class="language-ts">@Entity({ name: &#39;planet&#39; })
@@ -210,6 +215,9 @@ kilometerPrice: number;
 <pre><code language="language-ts" class="language-ts">@Column()
 name: string;
 </code></pre>
+<p>Les imports dans ces entités sont les suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { Column, Entity } from &#39;typeorm&#39;;
+</code></pre>
 <p>Créons ensuite, dans <code>src\utils\default-entity.ts</code>, la classe <code>DefaultEntity</code> qui contient les propriétés communes à toutes les entités de notre application, à savoir :</p>
 <ul>
 <li><code>id</code> : un identifiant technique généré automatiquement par incrément</li>
@@ -217,7 +225,9 @@ name: string;
 <li><code>active</code> : un booléen indiquant si la ressource est active</li>
 </ul>
 <p>Le code de la classe <code>DefaultEntity</code> est le suivant :</p>
-<pre><code language="language-ts" class="language-ts">import { Exclude } from &#34;class-transformer&#34;;
+<pre><code language="language-ts" class="language-ts">// src/utils/default-entity.ts
+
+import { Exclude } from &#34;class-transformer&#34;;
 import { Column, Generated, PrimaryGeneratedColumn } from &#34;typeorm&#34;;
 
 export class DefaultEntity {
@@ -261,6 +271,10 @@ export class DefaultEntity {
     StarshipModule,
   ],
 </code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { ConfigModule, ConfigService } from &#39;@nestjs/config&#39;;
+import { TypeOrmModule, TypeOrmModuleOptions } from &#39;@nestjs/typeorm&#39;;
+</code></pre>
 <p>Dans <code>src\planet\planet.module.ts</code>, ajoutons l&#39;import de TypeORM pour l&#39;entité <code>Planet</code> et l&#39;export du service <code>PlanetService</code> :</p>
 <pre><code language="language-ts" class="language-ts">  imports: [TypeOrmModule.forFeature([Planet])],
   exports: [PlanetService],
@@ -274,6 +288,10 @@ export class DefaultEntity {
     @InjectRepository(Planet)
     private readonly planetRepository: Repository&lt;Planet&gt;,
   ) {}
+</code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { InjectRepository } from &#39;@nestjs/typeorm&#39;;
+import { Repository } from &#39;typeorm/repository/Repository&#39;;
 </code></pre>
 <p>Puis modifions la méthode <code>findAll()</code> pour utiliser le repository qui va exécuter la requête de récupération des objets <code>Planet</code> sur la base de données. La signature de la méthode est modifiée pour renvoyer un objet <code>Promise<Planet[]></code> :</p>
 <pre><code language="language-ts" class="language-ts">  findAll(): Promise&lt;Planet[]&gt; {
@@ -290,15 +308,17 @@ export class DefaultEntity {
     return this.starshipRepository.find();
   }
 </code></pre>
-<p>Les données <code>planet</code> et <code>starship</code> sont mainteanant récupérées depuis la base de données. On peut le tester avec <a href="http://localhost:3000/planet" target="_blank">http://localhost:3000/planet</a> et <a href="http://localhost:3000/starship" target="_blank">http://localhost:3000/starship</a>.</p>
+<p>Les données <code>planet</code> et <code>starship</code> sont maintenant récupérées depuis la base de données. On peut le tester avec <a href="http://localhost:3000/planet" target="_blank">http://localhost:3000/planet</a> et <a href="http://localhost:3000/starship" target="_blank">http://localhost:3000/starship</a>.</p>
+<aside class="warning"><p>Il faut redémarrer l&#39;application pour que les modifications des variables d&#39;environnement soient prises en compte.</p>
+</aside>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="CRUD Planet et Starship" duration="20">
+      <google-codelab-step label="CRUD Planet et Starship" duration="25">
         <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step4&#34; pour débuter cette étape.</p>
 </aside>
-<p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écrtirure en base de données.</p>
+<p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écriture en base de données.</p>
 <p>Modifions <code>src\planet\dto\create-planet.dto.ts</code> pour rajouter les propriétés utiles à la création d&#39;une planète. On y ajoute des annotations utiles à l&#39;exposition Swagger et à la validation des données :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiProperty()
   @Expose()
@@ -315,6 +335,11 @@ export class DefaultEntity {
   @IsBoolean()
   active: boolean;
 </code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { ApiProperty } from &#39;@nestjs/swagger&#39;;
+import { Expose } from &#39;class-transformer&#39;;
+import { IsBoolean, IsNumber, IsString } from &#39;class-validator&#39;;
+</code></pre>
 <p><code>UpdatePlanetDto</code> hérite partiellement de <code>CreatePlanetDto</code> en rajoutant les propriétés nécessaires à la mise à jour :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiProperty()
   @Expose()
@@ -322,6 +347,11 @@ export class DefaultEntity {
   @IsUUID()
   @IsOptional()
   uuid: string;
+</code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { ApiProperty, PartialType } from &#39;@nestjs/swagger&#39;;
+import { Expose } from &#39;class-transformer&#39;;
+import { IsNotEmpty, IsUUID, IsOptional } from &#39;class-validator&#39;;
 </code></pre>
 <p>Procédons de même pour <code>CreateStarshipDto</code>  :</p>
 <pre><code language="language-ts" class="language-ts">  @ApiProperty()
@@ -352,12 +382,12 @@ export class DefaultEntity {
   @IsOptional()
   uuid: string;
 </code></pre>
-<p>Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans <code>src\main.ts</code> :</p>
+<p>Pour que les annotations soient actives, nous devons ajouter la configuration suivante dans la méthode <code>bootstrap</code> de  <code>src\main.ts</code> :</p>
 <pre><code language="language-ts" class="language-ts">  //------- IN &amp; OUT
   // Enables global behaviors on incoming DTO
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Only expose attributes wille be accepted on incoming DTO
+      whitelist: true, // Only exposed attributes will be accepted on incoming DTO
       transform: true, // Automatically converts attributes from incoming DTO when possible
       transformOptions: { enableImplicitConversion: true },
     }),
@@ -366,6 +396,9 @@ export class DefaultEntity {
   // Enables global behaviors on outgoing entities
   // For examples, @Exclude decorators will be processed
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+</code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { ClassSerializerInterceptor, ValidationPipe } from &#39;@nestjs/common&#39;;
 </code></pre>
 <p>Modifions <code>PlanetService</code> pour utiliser les DTO et le repository.</p>
 <p>Commençons par la méthode <code>create()</code>. Le type de retour est modifié pour correspondre au type de retour de la méthode <code>save()</code> du repository :</p>
@@ -402,6 +435,10 @@ export class DefaultEntity {
     return this.planetRepository.delete({ uuid });
   }
 </code></pre>
+<p>Avec les imports suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { NotFoundException } from &#39;@nestjs/common&#39;;
+import { DeleteResult } from &#39;typeorm&#39;;
+</code></pre>
 <p>La classe <code>PlanetController</code> doit être modifiée pour prendre en compte nos modifications sur <code>PlanetService</code> et pour utiliser des UUID :</p>
 <pre><code language="language-ts" class="language-ts">  @Get(&#39;:uuid&#39;)
   async findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Planet&gt; {
@@ -428,6 +465,10 @@ export class DefaultEntity {
 <pre><code language="language-ts" class="language-ts">  @ApiTags(&#39;planets&#39;)
   @Controller({ path: &#39;/planets&#39;, version: &#39;1&#39; })
   export class PlanetController {
+</code></pre>
+<p>Les imports à utiliser sont les suivants :</p>
+<pre><code language="language-ts" class="language-ts">import { Body, ParseUUIDPipe } from &#39;@nestjs/common&#39;;
+import { ApiTags } from &#39;@nestjs/swagger&#39;;
 </code></pre>
 <p>Procédons de même pour <code>StarshipService</code> :</p>
 <pre><code language="language-ts" class="language-ts">  create(createStarshipDto: CreateStarshipDto): Promise&lt;Starship&gt; {
