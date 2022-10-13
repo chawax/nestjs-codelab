@@ -40,8 +40,6 @@ npm i
 ## Première API
 Duration: 20:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step1" pour débuter cette étape.</aside>
-
 Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.
 
 La première route de notre API consiste à donner l'état de santé de notre application.
@@ -122,7 +120,7 @@ L'interface Swagger est accessible via [http://localhost:3000/api](http://localh
 ## Ressources Planet et Starship
 Duration: 10:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step2" pour débuter cette étape.</aside>
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step2" pour débuter cette étape : <code>git checkout -f step2</code></aside>
 
 Nous allons maintenant créer une API pour la gestion de planètes.
 Pour ce faire, nous allons créer des classes [controller](https://docs.nestjs.com/controllers), [service](https://docs.nestjs.com/providers#services), DTO et entity et placer le tout dans un module dédié.
@@ -238,7 +236,7 @@ De même que pour `planet`, la route qui liste tous les vaisseaux peut être tes
 ## TypeORM
 Duration: 20:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step3" pour débuter cette étape.</aside>
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step3" pour débuter cette étape : <code>git checkout -f step3</code></aside>
 
 Nous allons maintenant activer l'ORM [TypeORM](https://typeorm.io/) pour lire des données dans une base de données [SQLite](https://www.sqlite.org/). Une base SQLite contenant déjà des données est incluse dans le repository cloné.
 
@@ -396,7 +394,7 @@ Les données `planet` et `starship` sont maintenant récupérées depuis la base
 ## CRUD Planet et Starship
 Duration: 25:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step4" pour débuter cette étape.</aside>
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step4" pour débuter cette étape : <code>git checkout -f step4</code></aside>
 
 Nous allons maintenant rajouter les opérations de récupération unitaire et d'écriture en base de données.
 
@@ -728,7 +726,7 @@ Créons un starship via la route `POST` `/v1/starships` :
 ## Création de la ressource `Booking`
 Duration: 15:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step5" pour débuter cette étape.</aside>
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step5" pour débuter cette étape : <code>git checkout -f step5</code></aside>
 
 Dans cette étape nous allons créer une nouvelle ressource : `booking` :
 
@@ -967,7 +965,7 @@ Il est maintenant possible de manipuler les bookings avec leur API dans Swagger.
 ## Sécurisation des contrôleurs
 Duration: 10:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step6" pour débuter cette étape.</aside>
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step6" pour débuter cette étape : <code>git checkout -f step6</code></aside>
 
 Nous allons sécuriser l'accès à nos endoints en exigeant la fourniture d'un bearer d'authentification dans les headers des requêtes. Nous allons créer un "guard", un composant NestJS qui permet de contrôler l'accès à des routes.
 
@@ -1055,7 +1053,7 @@ Il ne reste plus qu'à lancer Swagger UI. Tester les services sans bearer : on a
 ## Gestion de la configuration
 Duration: 10:00
 
-<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step7" pour débuter cette étape.</aside>
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step7" pour débuter cette étape : <code>git checkout -f step7</code></aside>
 
 Nous allons maintenant améliorer la gestion de configuration en bloquant le démarrage de l'application si des variables d'environnement ne sont pas correctes et en évitant l'accès direct aux variables d'environnement depuis les composants de l'application.
 

@@ -52,9 +52,7 @@ npm i
       </google-codelab-step>
     
       <google-codelab-step label="Première API" duration="20">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step1&#34; pour débuter cette étape.</p>
-</aside>
-<p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
+        <p>Pour commencer, nous allons créer une première API très simple et exposer sa documentation via Swagger.</p>
 <p>La première route de notre API consiste à donner l&#39;état de santé de notre application.</p>
 <p>Créons le module <code>health</code> :</p>
 <pre><code language="language-bash" class="language-bash">nest g module health
@@ -105,7 +103,7 @@ check(): string {
       </google-codelab-step>
     
       <google-codelab-step label="Ressources Planet et Starship" duration="10">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step2&#34; pour débuter cette étape.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step2&#34; pour débuter cette étape : <code>git checkout -f step2</code></p>
 </aside>
 <p>Nous allons maintenant créer une API pour la gestion de planètes. Pour ce faire, nous allons créer des classes <a href="https://docs.nestjs.com/controllers" target="_blank">controller</a>, <a href="https://docs.nestjs.com/providers#services" target="_blank">service</a>, DTO et entity et placer le tout dans un module dédié.</p>
 <p>Tout cela peut être préparé avec la commande suivante :</p>
@@ -201,7 +199,7 @@ kilometerPrice: number;
       </google-codelab-step>
     
       <google-codelab-step label="TypeORM" duration="20">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step3&#34; pour débuter cette étape.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step3&#34; pour débuter cette étape : <code>git checkout -f step3</code></p>
 </aside>
 <p>Nous allons maintenant activer l&#39;ORM <a href="https://typeorm.io/" target="_blank">TypeORM</a> pour lire des données dans une base de données <a href="https://www.sqlite.org/" target="_blank">SQLite</a>. Une base SQLite contenant déjà des données est incluse dans le repository cloné.</p>
 <p>Sur les classes entity, nous rajoutons l&#39;annotation <code>@Entity()</code> pour indiquer à TypeORM de faire le mapping avec une table de la base de données.</p>
@@ -316,7 +314,7 @@ import { Repository } from &#39;typeorm/repository/Repository&#39;;
       </google-codelab-step>
     
       <google-codelab-step label="CRUD Planet et Starship" duration="25">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step4&#34; pour débuter cette étape.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step4&#34; pour débuter cette étape : <code>git checkout -f step4</code></p>
 </aside>
 <p>Nous allons maintenant rajouter les opérations de récupération unitaire et d&#39;écriture en base de données.</p>
 <p>Modifions <code>src\planet\dto\create-planet.dto.ts</code> pour rajouter les propriétés utiles à la création d&#39;une planète. On y ajoute des annotations utiles à l&#39;exposition Swagger et à la validation des données :</p>
@@ -570,7 +568,7 @@ export class StarshipController {
     
       <google-codelab-step label="Création de la ressource 
 Booking" duration="15">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step5&#34; pour débuter cette étape.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step5&#34; pour débuter cette étape : <code>git checkout -f step5</code></p>
 </aside>
 <p>Dans cette étape nous allons créer une nouvelle ressource : <code>booking</code> :</p>
 <pre><code language="language-bash" class="language-bash">nest g resource booking
@@ -764,7 +762,7 @@ findOne(@Param(&#39;uuid&#39;, new ParseUUIDPipe()) uuid: string): Promise&lt;Bo
       </google-codelab-step>
     
       <google-codelab-step label="Sécurisation des contrôleurs" duration="10">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step6&#34; pour débuter cette étape.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step6&#34; pour débuter cette étape : <code>git checkout -f step6</code></p>
 </aside>
 <p>Nous allons sécuriser l&#39;accès à nos endoints en exigeant la fourniture d&#39;un bearer d&#39;authentification dans les headers des requêtes. Nous allons créer un &#34;guard&#34;, un composant NestJS qui permet de contrôler l&#39;accès à des routes.</p>
 <p>Dans le fichier <code>.env</code> ajouter la variable d&#39;environnement <code>API_BEARER</code> qui définit la valeur attendue pour le bearer :</p>
@@ -831,7 +829,7 @@ export class BookingController {
       </google-codelab-step>
     
       <google-codelab-step label="Gestion de la configuration" duration="10">
-        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step7&#34; pour débuter cette étape.</p>
+        <aside class="special"><p>Si vous n&#39;avez pas eu le temps de finir l&#39;étape précédente, vous pouvez faire un checkout de la branche &#34;step7&#34; pour débuter cette étape : <code>git checkout -f step7</code></p>
 </aside>
 <p>Nous allons maintenant améliorer la gestion de configuration en bloquant le démarrage de l&#39;application si des variables d&#39;environnement ne sont pas correctes et en évitant l&#39;accès direct aux variables d&#39;environnement depuis les composants de l&#39;application.</p>
 <p>Créons le fichier <code>config/configuration.ts</code> qui va définir le mapping entre nos clés de configuration et des variables d&#39;environnement :</p>
