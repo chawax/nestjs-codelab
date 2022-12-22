@@ -74,9 +74,9 @@ https://github.com/googlecodelabs/tools/tree/main/claat/parser/md
 
 Pour que les fichiers du codelab puissent être déployés sur Github.io, il faut les copier dans le répertoire `docs` et les pousser sur le repository Github.
 
-    ```bash
-    cd codelab
-    cp -R nestjs/* ../docs
-    ```
+```bash
+cd codelab
+cp -R nestjs/* ../docs
+```
 
 Le compte Github doit être configuré pour faire pointer Github Pages sur le répertoire `/docs` du repository. Le codelab est alors accessible sur l'adresse : `https://chawax.github.io/nestjs-codelab`
