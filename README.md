@@ -1,6 +1,6 @@
 # De la Terre à la Lune (et au-delà) avec NestJS
 
-Vous trouverez ici le code pour le codelab d'introduction à NestJS du DevFest Nantes 2022.
+Vous trouverez ici le code pour le codelab d'introduction à NestJS du Devoxx Paris 2023.
 
 ## A faire avant le codelab
 
@@ -11,7 +11,6 @@ Prérequis :
 - [Git](https://git-scm.com/)
 - [Node / npm](https://nodejs.org/)
 - [Visual Studio Code](https://code.visualstudio.com/) (ou tout autre IDE JS)
-
 
 Installer [Nest CLI](https://docs.nestjs.com/cli/overview) :
 
