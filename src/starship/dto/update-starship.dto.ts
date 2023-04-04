@@ -5,7 +5,6 @@ import { CreateStarshipDto } from './create-starship.dto';
 
 export class UpdateStarshipDto extends PartialType(CreateStarshipDto) {
   @ApiProperty()
-  @Expose()
   @IsNotEmpty()
   @IsUUID()
   @IsOptional()
