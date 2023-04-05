@@ -1127,3 +1127,551 @@ Décommentons la variable et relançons `npm run start:dev` : l'application dém
 
 Ajoutons maintenant un paramètre `PORT` avec la valeur `8080` dans le fichier `.env` et relançons `npm run start:dev` : l'application démarre désormais sur le port `8080`.
 
+## Tests
+Duration: 30:00
+
+<aside>Si vous n'avez pas eu le temps de finir l'étape précédente, vous pouvez faire un checkout de la branche "step8" pour débuter cette étape : <code>git checkout -f step8</code></aside>
+
+Nous allons maintenant rajouter des tests au projet.
+
+Lors de la création des artefacts via la CLI, Nest crée des fichiers de tests. Ceux-ci ont une extension `.spec.ts`.
+
+Lançons les tests qui ont été générés de manière automatique :
+```bash
+npm run test
+```
+On peut constater que les tests échouent.
+
+En effet, dans les tests créés par défaut, il faut compléter l'injection de dépendance en paramétrant les providers nécessaires à la bonne exécution des tests.
+Par exemple dans `booking.controller.spec.ts`, la configuration générée de base est la suivante :
+
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    controllers: [BookingController],
+    providers: [BookingService],
+  }).compile();
+
+  controller = module.get<BookingController>(BookingController);
+});
+```
+
+Il est nécessaire de modifier le code de la manière suivante :
+
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    controllers: [BookingController],
+    providers: [
+      BookingService,
+      PlanetService,
+      StarshipService,
+      {
+        provide: getRepositoryToken(Booking),
+        useClass: Repository,
+      },
+      {
+        provide: getRepositoryToken(Planet),
+        useClass: Repository,
+      },
+      {
+        provide: getRepositoryToken(Starship),
+        useClass: Repository,
+      },
+    ],
+  }).compile();
+
+  controller = module.get<BookingController>(BookingController);
+});
+```
+
+De même configurons l'injection de dépendances pour `booking.service.spec.ts` :
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    providers: [
+      BookingService,
+      PlanetService,
+      StarshipService,
+      {
+        provide: getRepositoryToken(Booking),
+        useClass: Repository,
+      },
+      {
+        provide: getRepositoryToken(Planet),
+        useClass: Repository,
+      },
+      {
+        provide: getRepositoryToken(Starship),
+        useClass: Repository,
+      },
+    ],
+  }).compile();
+
+  service = module.get<BookingService>(BookingService);
+});
+```
+
+Pour `planet.controller.spec.ts` :
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    controllers: [PlanetController],
+    providers: [
+      PlanetService,
+      {
+        provide: getRepositoryToken(Planet),
+        useClass: Repository,
+      },
+    ],
+  }).compile();
+
+  controller = module.get<PlanetController>(PlanetController);
+});
+```
+
+Pour `planet.service.spec.ts` :
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    providers: [
+      PlanetService,
+      {
+        provide: getRepositoryToken(Planet),
+        useClass: Repository,
+      },
+    ],
+  }).compile();
+
+  service = module.get<PlanetService>(PlanetService);
+});
+```
+
+Pour `starship.controller.spec.ts` :
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    controllers: [StarshipController],
+    providers: [
+      StarshipService,
+      {
+        provide: getRepositoryToken(Starship),
+        useClass: Repository,
+      },
+    ],
+  }).compile();
+
+  controller = module.get<StarshipController>(StarshipController);
+});
+```
+
+Pour `starship.service.spec.ts` :
+```ts
+beforeEach(async () => {
+  const module: TestingModule = await Test.createTestingModule({
+    providers: [
+      StarshipService,
+      {
+        provide: getRepositoryToken(Starship),
+        useClass: Repository,
+      },
+    ],
+  }).compile();
+
+  service = module.get<StarshipService>(StarshipService);
+});
+```
+
+Dans `bearer.guard.spec.ts`, pour l'instant mettons en commentaire le test :
+```ts
+it('should be defined', () => {
+  //expect(new BearerGuard()).toBeDefined();
+});
+```
+
+<aside>Pour récupérer toutes les modifications avec les tests qui fonctionnent, vous pouvez faire un checkout de la branche "step8-tests-ok" : <code>git checkout -f step8-tests-ok</code></aside>
+
+A ce stade, tous les tests passent :
+```bash
+npm run test
+```
+
+Nous allons pouvoir tester les fonctionnalités de l'application en modifiant les tests existants ou en rajoutant de nouveaux tests.
+
+Commençons par un test simple en créant le fichier `src\booking\entities\booking.entity.spec.ts` avec le contenu suivant :
+```ts
+import { Planet } from 'src/planet/entities/planet.entity';
+import { Booking } from './booking.entity';
+import { Starship } from 'src/starship/entities/starship.entity';
+import * as dayjs from 'dayjs';
+
+describe('BookingEntity', () => {
+  let destination: Planet;
+  let starship: Starship;
+
+  beforeAll(async () => {
+    destination = {
+      id: 1,
+      uuid: 'uuid',
+      active: true,
+      name: 'Saturn',
+      distanceToEarth: 1427000000,
+    };
+    starship = {
+      id: 1,
+      uuid: 'uuid',
+      active: true,
+      name: 'Enterprise',
+      speed: 100000,
+      kilometerPrice: 2500,
+    };
+  });
+
+  it('Should calculate arrival date', () => {
+    // --- ARRANGE
+    const booking = new Booking();
+    booking.destination = destination;
+    booking.starship = starship;
+    booking.departureDate = new Date('2023-04-04');
+
+    // --- ACT
+    booking.processTravelTime();
+
+    // --- ASSERT
+    expect(dayjs(booking.arrivalDate).format('YYYY-MM-DD')).toEqual('2024-11-19');
+  });
+
+  it('Should calculate travel price', () => {
+    // --- ARRANGE
+    const booking = new Booking();
+    booking.destination = destination;
+    booking.starship = starship;
+
+    // --- ACT
+    booking.processPrice();
+
+    // --- ASSERT
+    expect(booking.price).toEqual(3567500000000);
+  });
+});
+```
+
+Nous allons maintenant tester les fonctionnalités de booking en modifiant `booking.controller.spec.ts` :
+```ts
+import { UnprocessableEntityException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Planet } from 'src/planet/entities/planet.entity';
+import { PlanetService } from 'src/planet/planet.service';
+import { Starship } from 'src/starship/entities/starship.entity';
+import { StarshipService } from 'src/starship/starship.service';
+import { Repository } from 'typeorm';
+import { BookingController } from './booking.controller';
+import { BookingService } from './booking.service';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
+import { Booking } from './entities/booking.entity';
+
+const destination = {
+  id: 1,
+  uuid: 'destination-uuid',
+  active: true,
+  name: 'Saturn',
+  distanceToEarth: 1427000000,
+};
+const starship = {
+  id: 1,
+  uuid: 'starship-uuid',
+  active: true,
+  name: 'Enterprise',
+  speed: 100000,
+  kilometerPrice: 2500,
+};
+
+describe('BookingController', () => {
+  let bookingController: BookingController;
+  let bookingCreateDto: CreateBookingDto;
+  let bookingUpdateDto: UpdateBookingDto;
+  let bookingEntity: Booking;
+  let planetRepository: Repository<Planet>;
+  let starshipRepository: Repository<Starship>;
+  let bookingRepository: Repository<Booking>;
+
+  beforeEach(() => {
+    bookingCreateDto = new CreateBookingDto();
+    bookingCreateDto.destinationUuid = 'destination-uuid';
+    bookingCreateDto.starshipUuid = 'starship-uuid';
+    bookingCreateDto.departureDate = new Date('2023-04-04');
+    bookingCreateDto.traveller = 'Michael Collins';
+
+    bookingUpdateDto = new UpdateBookingDto();
+    bookingUpdateDto.destinationUuid = 'destination-uuid';
+    bookingUpdateDto.starshipUuid = 'starship-uuid';
+    bookingUpdateDto.departureDate = new Date('2023-04-04');
+    bookingUpdateDto.traveller = 'Michael Collins';
+
+    bookingEntity = new Booking();
+    bookingEntity.destination = destination;
+    bookingEntity.starship = starship;
+    bookingEntity.departureDate = new Date('2023-04-04');
+    bookingEntity.traveller = 'Michael Collins';
+  });
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [BookingController],
+      providers: [
+        BookingService,
+        PlanetService,
+        StarshipService,
+        {
+          provide: getRepositoryToken(Booking),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Planet),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Starship),
+          useClass: Repository,
+        },
+      ],
+    }).compile();
+
+    bookingController = module.get<BookingController>(BookingController);
+    planetRepository = module.get<Repository<Planet>>(getRepositoryToken(Planet));
+    starshipRepository = module.get<Repository<Starship>>(getRepositoryToken(Starship));
+    bookingRepository = module.get<Repository<Booking>>(getRepositoryToken(Booking));
+  });
+
+  it('should be defined', () => {
+    expect(bookingController).toBeDefined();
+  });
+
+  describe('create', () => {
+    it('should create a booking', async () => {
+      // --- ARRANGE
+      const planetRepoFindOneByUuidSpy = jest.spyOn(planetRepository, 'findOneBy').mockResolvedValueOnce(destination);
+      const starshipRepoFindOneByUuidSpy = jest.spyOn(starshipRepository, 'findOneBy').mockResolvedValueOnce(starship);
+      const bookingRepoSaveSpy = jest.spyOn(bookingRepository, 'save').mockResolvedValueOnce(bookingEntity);
+
+      // --- ACT
+      const booking = await bookingController.create(bookingCreateDto);
+
+      // --- ASSERT
+      expect(planetRepoFindOneByUuidSpy).toHaveBeenCalledWith({ uuid: destination.uuid });
+      expect(starshipRepoFindOneByUuidSpy).toHaveBeenCalledWith({ uuid: starship.uuid });
+      expect(bookingRepoSaveSpy).toHaveBeenCalledWith(bookingEntity);
+      expect(booking).toEqual(bookingEntity);
+    });
+
+    it('should throw an unprocessable entity exception', async () => {
+      // --- ARRANGE
+      jest.spyOn(planetRepository, 'findOneBy').mockResolvedValueOnce(null);
+      jest.spyOn(starshipRepository, 'findOneBy').mockResolvedValueOnce(null);
+
+      try {
+        // --- ACT
+        await bookingController.create(bookingCreateDto);
+      } catch (exception) {
+        // --- ASSERT
+        expect(exception).toBeInstanceOf(UnprocessableEntityException);
+        expect(exception.message).toEqual('Both destination and starship should contains existing uuids');
+      }
+    });
+  });
+
+  describe('update', () => {
+    it('should update a booking', async () => {
+      // --- ARRANGE
+      const bookingRepoFindOneSpy = jest.spyOn(bookingRepository, 'findOne').mockResolvedValueOnce(bookingEntity);
+      const planetRepoFindOneByUuidSpy = jest.spyOn(planetRepository, 'findOneBy').mockResolvedValueOnce(destination);
+      const starshipRepoFindOneByUuidSpy = jest.spyOn(starshipRepository, 'findOneBy').mockResolvedValueOnce(starship);
+      const bookingRepoSaveSpy = jest.spyOn(bookingRepository, 'save').mockResolvedValueOnce(bookingEntity);
+
+      // --- ACT
+      const booking = await bookingController.update(bookingEntity.uuid, bookingUpdateDto);
+
+      // --- ASSERT
+      expect(bookingRepoFindOneSpy).toHaveBeenCalledWith({
+        where: { uuid: booking.uuid },
+        relations: ['starship', 'destination'],
+      });
+      expect(planetRepoFindOneByUuidSpy).toHaveBeenCalledWith({ uuid: destination.uuid });
+      expect(starshipRepoFindOneByUuidSpy).toHaveBeenCalledWith({ uuid: starship.uuid });
+      expect(bookingRepoSaveSpy).toHaveBeenCalledWith(bookingEntity);
+      expect(booking).toEqual(bookingEntity);
+    });
+
+    it.each`
+      destination    | starship    | errorMessage
+      ${null}        | ${starship} | ${"The provided destination UUID doesn't map to an existing destination"}
+      ${destination} | ${null}     | ${"The provided starship UUID doesn't map to an existing starship"}
+    `('should throw unprocessables entities exceptions', async ({ destination, starship, errorMessage }) => {
+      // --- ARRANGE
+      jest.spyOn(bookingRepository, 'findOne').mockResolvedValueOnce(bookingEntity);
+      jest.spyOn(planetRepository, 'findOneBy').mockResolvedValueOnce(destination);
+      jest.spyOn(starshipRepository, 'findOneBy').mockResolvedValueOnce(starship);
+      jest.spyOn(bookingRepository, 'save').mockResolvedValueOnce(bookingEntity);
+
+      try {
+        // --- ACT
+        await bookingController.update(bookingEntity.uuid, bookingUpdateDto);
+      } catch (exception) {
+        // --- ASSERT
+        expect(exception).toBeInstanceOf(UnprocessableEntityException);
+        expect(exception.message).toEqual(errorMessage);
+      }
+    });
+  });
+});
+```
+
+Nous pouvons modifier les tests du module de sécurité dans `bearer.guard.spec.ts` :
+```ts
+import { createMock } from '@golevelup/ts-jest';
+import { ExecutionContext } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import configuration from 'src/config/configuration';
+import configurationSchema from 'src/config/schema';
+import { BearerGuard } from './bearer.guard';
+
+describe('BearerGuard', () => {
+  let bearerGuard: BearerGuard;
+  let configService: ConfigService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: '.env.test',
+          load: [configuration],
+          validationSchema: configurationSchema,
+          validationOptions: {
+            abortEarly: true,
+          },
+        }),
+      ],
+      providers: [BearerGuard],
+    }).compile();
+
+    bearerGuard = module.get<BearerGuard>(BearerGuard);
+    configService = await module.get<ConfigService>(ConfigService);
+  });
+
+  it('should be defined', () => {
+    expect(bearerGuard).toBeDefined();
+  });
+
+  it.each`
+    bearer          | expected
+    ${''}           | ${true}
+    ${'bad-bearer'} | ${false}
+  `('should authorized request or not', async ({ bearer, expected }) => {
+    // --- ARRANGE
+    // Twist to use the config because it's unavailable in the each parameters context
+    bearer = expected ? configService.get<string>('security.apiBearer') : bearer;
+
+    const mockExecutionContext: ExecutionContext = createMock<ExecutionContext>({
+      switchToHttp: () => ({
+        getRequest: () => ({
+          headers: {
+            authorization: `Bearer ${bearer}`,
+          },
+        }),
+      }),
+    });
+
+    // --- ACT
+    const isAuthorized = await bearerGuard.canActivate(mockExecutionContext);
+
+    // --- ASSERT
+    expect(isAuthorized).toEqual(expected);
+  });
+});
+```
+
+Nous allons maintenant créer un test "end to end" en créant le fichier `src\starship\starship.controller.e2e.spec.ts` :
+```ts
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NestApplication } from '@nestjs/core';
+import { Test } from '@nestjs/testing';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import configuration from 'src/config/configuration';
+import configurationSchema from 'src/config/schema';
+import { BearerGuard } from 'src/security/bearer.guard';
+import { StarshipModule } from 'src/starship/starship.module';
+import * as request from 'supertest';
+
+describe('StarshipController', () => {
+  let app: NestApplication;
+  let configService: ConfigService;
+
+  beforeEach(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: '.env.test',
+          load: [configuration],
+          validationSchema: configurationSchema,
+          validationOptions: {
+            abortEarly: true,
+          },
+        }),
+        TypeOrmModule.forRootAsync({
+          imports: [ConfigModule],
+          inject: [ConfigService],
+          useFactory: async (configService: ConfigService) => {
+            return {
+              type: 'sqlite',
+              database: configService.get('database.path'),
+              entities: [__dirname + '/**/*.entity{.ts,.js}'],
+              synchronize: true,
+            } as TypeOrmModuleOptions;
+          },
+        }),
+        StarshipModule,
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication<NestApplication>();
+    configService = app.get<ConfigService>(ConfigService);
+
+    // SECURITY
+    app.useGlobalGuards(new BearerGuard(configService));
+
+    // VERSIONNING
+    app.enableVersioning({
+      type: VersioningType.URI,
+    });
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true, // Only expose attributes wille be accepted on incoming DTO
+        transform: true, // Automatically converts attributes from incoming DTO when possible
+        transformOptions: { enableImplicitConversion: true },
+      }),
+    );
+
+    await app.init();
+  });
+
+  describe('create', () => {
+    it(`/v1/starships (GET)(SUCCESS)`, async () => {
+      const result = await request(app.getHttpServer())
+        .get('/v1/starships')
+        .set('Authorization', `Bearer ${configService.get<string>('security.apiBearer')}`)
+        .expect(200)
+        .expect((res) => expect(res.body[0].name).toEqual('Millenium falcon'));
+    });
+  });
+});
+```
+
+Le taux de couverture des tests peut être vérifié avec la commande `npm run test:cov` :
+![Tests coverage](nestjs/img/coverage.png)
